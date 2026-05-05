@@ -1,46 +1,147 @@
-# Schema Engine Package
+# SEO Agent OS — Schema Engine Package
 
-JSON-LD structured data generation and validation.
+Generates JSON-LD structured data for all major schema.org types.
 
-## Overview
+---
 
-Generates comprehensive JSON-LD schema markup for websites: Organization, LocalBusiness, WebSite, BreadcrumbList, Service, FAQPage, Article, and more. Validates schema syntax, checks for required properties, and auto-inserts markup into content drafts.
+## Architecture
+
+```
+packages/schema_engine/
+  models.py                        # SchemaContext, SchemaType, ValidationResult, field models
+  validator.py                     # SchemaValidator — validates required fields, URL/email formats
+  generators/
+    org_schema.py                  # OrganizationSchemaGenerator
+    local_business_schema.py       # LocalBusinessSchemaGenerator
+    website_schema.py              # WebSiteSchemaGenerator
+    service_schema.py              # ServiceSchemaGenerator
+    faq_schema.py                  # FAQSchemaGenerator
+    article_schema.py              # ArticleSchemaGenerator / BlogPosting
+    __init__.py
+  __init__.py                    # Public API re-exports
+  __main__.py                    # CLI entry point
+  README.md                      # This file
+```
+
+---
+
+## Public API
+
+```python
+from packages.schema_engine import (
+    SchemaContext,
+    SchemaType,
+    SchemaValidator,
+    ValidationResult,
+    # Generators
+    OrganizationSchemaGenerator,
+    LocalBusinessSchemaGenerator,
+    WebSiteSchemaGenerator,
+    ServiceSchemaGenerator,
+    FAQSchemaGenerator,
+    ArticleSchemaGenerator,
+)
+```
+
+---
+
+## Usage
+
+```python
+# FAQPage schema
+from packages.schema_engine import FAQSchemaGenerator
+
+gen = FAQSchemaGenerator()
+schema = gen.generate(faqs=[
+    {"question": "What is HVAC maintenance?", "answer": "Regular HVAC maintenance..."},
+])
+print(schema.data)
+# {'@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': '...', ...}]}
+```
+
+```python
+# LocalBusiness schema
+from packages.schema_engine import LocalBusinessSchemaGenerator, OpeningHours
+
+gen = LocalBusinessSchemaGenerator()
+schema = gen.generate(
+    name="Mountain View HVAC",
+    url="https://mtvhvac.com",
+    street_address="123 Main St",
+    city="Roanoke",
+    state="VA",
+    postal_code="24019",
+    phone="+1-540-555-0100",
+    price_range="$$",
+    same_as=["https://facebook.com/mtvhvac"],
+)
+```
+
+```python
+# Article schema
+from packages.schema_engine import ArticleSchemaGenerator
+
+gen = ArticleSchemaGenerator()
+schema = gen.generate(
+    headline="How to Choose an HVAC Contractor",
+    author_name="Mike Thompson",
+    date_published="2026-05-01",
+    url="https://mtvhvac.com/blog/choose-hvac-contractor",
+)
+```
+
+```python
+# Validate any schema
+from packages.schema_engine import SchemaValidator
+
+validator = SchemaValidator()
+result = validator.validate(schema)
+print(result.is_valid, result.error_count, result.warning_count)
+```
+
+### CLI
+
+```bash
+python -m packages.schema_engine faq --faqs-json faqs.json -o faq-schema.json
+
+python -m packages.schema_engine local \
+    --name "Mountain View HVAC" --url https://mtvhvac.com \
+    --street "123 Main St" --city "Roanoke" --state "VA" --postal 24019 \
+    --phone "+1-540-555-0100" --price-range "$$"
+
+python -m packages.schema_engine validate --schema-json article-schema.json
+```
+
+---
 
 ## Supported Schema Types
 
-- Organization
-- LocalBusiness (with subtypes: AutoRental, LegalService, etc.)
-- WebSite (with SearchAction)
-- BreadcrumbList
-- Service
-- FAQPage
-- Article / BlogPosting
-- Person
-- ContactPage
-- ImageObject
+| Type | Generator | Notes |
+|------|-----------|-------|
+| Organization | `OrganizationSchemaGenerator` | Base org schema with address, geo, sameAs |
+| LocalBusiness | `LocalBusinessSchemaGenerator` | Requires address + geo; includes openingHours, areaServed |
+| WebSite | `WebSiteSchemaGenerator` | Optional SearchAction for site search |
+| Service | `ServiceSchemaGenerator` | provider, areaServed, priceRange |
+| FAQPage | `FAQSchemaGenerator` | Converts question/answer pairs to Question + Answer |
+| Article | `ArticleSchemaGenerator` | headline, author, datePublished, publisher |
+| BlogPosting | `ArticleSchemaGenerator(is_blog_post=True)` | Same generator with BlogPosting type |
 
-## Responsibilities
+---
 
-- Generate complete JSON-LD for all supported types
-- Validate JSON-LD syntax and required properties
-- Check schema against Google's Rich Results guidelines
-- Auto-insert schema into HTML content drafts
-- Generate standalone schema JSON files for manual insertion
-- Track schema version history per page
+## Validation
 
-## Key Classes / Functions
+SchemaValidator checks:
+- **Required properties** per type (name, url, address, etc.)
+- **URL format** for url/image/logo/sameAs fields
+- **Email format** for email fields
+- **Phone format** for telephone fields
+- **Date format** (ISO 8601) for datePublished/dateModified
+- **Recommended properties** (generates warnings)
 
-- `SchemaGenerator` — main schema factory
-- `OrganizationSchema` — generates Organization / LocalBusiness schemas
-- `WebsiteSchema` — generates WebSite schema with SearchAction
-- `BreadcrumbSchema` — generates breadcrumb list from URL path
-- `ArticleSchema` — generates Article / BlogPosting schema
-- `FaqSchema` — generates FAQPage schema from Q&A pairs
-- `SchemaValidator` — validates JSON-LD syntax and completeness
-- `SchemaInserter` — injects schema into HTML documents
+---
 
 ## Dependencies
 
-- pydantic
-- html.parser (stdlib)
-- packages.shared
+| Package | Purpose |
+|---------|---------|
+| `packages/shared` | Exceptions, types |
