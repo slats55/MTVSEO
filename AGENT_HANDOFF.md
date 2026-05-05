@@ -297,6 +297,16 @@ seo-agent-os/
 - [x] Created packages/schema-engine/__main__.py — CLI: org/local/website/service/faq/article/validate subcommands
 - [x] Updated packages/schema-engine/__init__.py and README.md — public API and full docs
 - [x] Updated AGENT_HANDOFF.md with Ticket 9 (schema-engine) completed work
+- [x] Created apps/web/package.json — Next.js 14, React 18, Tailwind CSS, Lucide icons, React Query
+- [x] Created apps/web/next.config.js, tsconfig.json, tailwind.config.ts, postcss.config.js
+- [x] Created apps/web/src/app/layout.tsx — Root layout with dark theme, sticky top nav, business selector
+- [x] Created apps/web/src/app/page.tsx — Main dashboard: score cards (SEO/GEO/Content/Crawl), quick actions, recent crawls table, top issues
+- [x] Created apps/web/src/app/businesses/page.tsx — Business list with search, add button, SEO scores
+- [x] Created apps/web/src/app/audits/page.tsx — Score breakdown grid, severity filter tabs, issue table
+- [x] Created apps/web/src/app/reports/page.tsx — Report cards with type labels, download/view, score badges
+- [x] Created apps/web/src/app/globals.css — Tailwind base with dark slate/blue theme CSS variables
+- [x] Created apps/web/README.md — Setup, environment variables, pages table, design system, API integration plan
+- [x] Updated AGENT_HANDOFF.md with Ticket 10 (apps/web dashboard MVP) completed work
 
 ## Files Created (Ticket 7 — reporting)
 
@@ -408,6 +418,18 @@ seo-agent-os/
 - packages/schema-engine/__main__.py — CLI: org/local/website/service/faq/article/validate
 - packages/schema-engine/README.md
 
+## Files Created (Ticket 10 — apps/web)
+
+- apps/web/package.json — Next.js 14, React 18, Tailwind, Lucide, React Query
+- apps/web/next.config.js, tsconfig.json, tailwind.config.ts, postcss.config.js
+- apps/web/src/app/layout.tsx — Root layout with dark theme, top nav, business selector
+- apps/web/src/app/page.tsx — Dashboard: score cards, quick actions, recent crawls, top issues
+- apps/web/src/app/businesses/page.tsx — Business list with search and SEO scores
+- apps/web/src/app/audits/page.tsx — Score breakdown grid, severity filter, issue table
+- apps/web/src/app/reports/page.tsx — Report cards with download/view actions
+- apps/web/src/app/globals.css — Dark theme CSS variables
+- apps/web/README.md — Setup, design system, API integration plan
+
 ## Commits
 
 | # | Description |
@@ -438,22 +460,26 @@ seo-agent-os/
 | 26 | feat(packages/reporting): Update __init__.py, add __main__.py CLI and README.md |
 | 27 | feat(packages/content-engine): Add content brief generator with BriefGenerator, KeywordClusterer, ContentPlanner, models, CLI |
 | 28 | feat(packages/schema-engine): Add JSON-LD schema generator with Organization, LocalBusiness, WebSite, Service, FAQ, Article generators + validator |
+| 29 | feat(apps/web): Add Next.js 14 dashboard MVP — dark theme, business selector, score cards, audit view, report viewer, businesses page |
 
 ## What's Next for Flash Agent
 
-**Start with Ticket 10: Dashboard MVP (apps/web/)**
+All 10 MVP tickets are complete. Remaining work:
 
-Build the Next.js dashboard with:
-1. `apps/web/package.json` — Next.js 14, React, Tailwind CSS, Lucide icons, React Query
-2. `apps/web/next.config.js` — Next.js config with TypeScript
-3. `apps/web/src/app/layout.tsx` — Root layout with dark theme, sidebar navigation
-4. `apps/web/src/app/page.tsx` — Main dashboard: business selector, SEO score card, GEO score card, recent crawl status, quick actions
-5. `apps/web/src/app/businesses/page.tsx` — Business management: list, add, view
-6. `apps/web/src/app/audits/page.tsx` — Audit dashboard: score breakdown, issue list with severity filters, opportunity list
-7. `apps/web/src/app/reports/page.tsx` — Report viewer: list saved reports, view markdown reports, download
-8. `apps/web/README.md` — Setup instructions, API endpoints reference, environment variables
+**High Priority:**
+- Build `packages/integrations/` — GSC, GA4, PageSpeed API connectors
+- Build Celery task workers for async crawl + audit jobs
+- Wire React Query to real API endpoints in apps/web
 
-Commit each file/group separately.
+**Documentation:**
+- `docs/API_SPEC.md` — Full REST API specification
+- `docs/SEO_AUDIT_SCORING.md` — SEO score model reference
+- `docs/GEO_AUDIT_SCORING.md` — GEO score model reference
+- `docs/CONTENT_WORKFLOW.md` — Content brief → draft → review → publish workflow
+- `docs/PUBLISHING_SAFETY.md` — Approval-mode and rollback procedures
+- `docs/COMPLIANCE_GUARDRAILS.md` — Cannabis/regulated-industry compliance notes
+- `.env.example` — All required environment variables
+- `README.md` — Project-level README tying everything together
 ---
 
 ## Handoff Protocol
