@@ -270,8 +270,28 @@ seo-agent-os/
 - [x] Created packages/geo-audit/__main__.py — CLI: python -m packages.geo_audit <crawl_result_json> with --robots, --domain, --output
 - [x] Updated packages/geo-audit/__init__.py and README.md — public API and full docs
 - [x] Updated AGENT_HANDOFF.md with Ticket 6 (geo-audit) completed work
+- [x] Created packages/reporting/models.py — ReportData, ScoreCard, IssueRow, FixRecommendation, ReportType, ReportFormat, ReportMetadata
+- [x] Created packages/reporting/formatters/markdown.py — MarkdownFormatter with score cards, issue tables, fix lists, supplemental sections
+- [x] Created packages/reporting/generators/audit_report.py — AuditReportGenerator: seo_audit + crawl_result → ReportData
+- [x] Created packages/reporting/generators/crawl_summary.py — CrawlSummaryGenerator: CrawlResult → ReportData with health/coverage/quality/efficiency scores
+- [x] Created packages/reporting/generators/content_report.py — ContentReportGenerator: PageRecord list → ReportData with content quality scoring
+- [x] Updated packages/reporting/__init__.py — public API re-exports
+- [x] Created packages/reporting/__main__.py — CLI: audit/crawl/content subcommands with --output flag
+- [x] Created packages/reporting/README.md — architecture, usage examples, CLI reference, score breakdown tables
+- [x] Updated AGENT_HANDOFF.md with Ticket 7 (reporting) completed work
 
-## Files Created (Ticket 5 — seo-audit)
+## Files Created (Ticket 7 — reporting)
+
+- packages/reporting/models.py — ReportData, ScoreCard, IssueRow, FixRecommendation, ReportType, ReportFormat, ReportMetadata
+- packages/reporting/formatters/markdown.py — MarkdownFormatter class
+- packages/reporting/generators/audit_report.py — AuditReportGenerator
+- packages/reporting/generators/crawl_summary.py — CrawlSummaryGenerator
+- packages/reporting/generators/content_report.py — ContentReportGenerator
+- packages/reporting/generators/__init__.py
+- packages/reporting/formatters/__init__.py
+- packages/reporting/__init__.py — public API re-exports
+- packages/reporting/__main__.py — CLI entry point
+- packages/reporting/README.md
 
 - services/api/config.py — Pydantic BaseSettings, get_settings() singleton
 - services/api/database.py — async SQLAlchemy 2.0 engine, session maker, get_db Depends, get_db_context
@@ -368,20 +388,23 @@ seo-agent-os/
 | 19 | packages/seo-audit: __init__.py, README.md, __main__.py CLI |
 | 20 | packages/geo-audit: Pydantic models — GeoScore, GeoIssue, GeoAuditReport, GeoIssueSeverity |
 | 21 | packages/geo-audit: Add GEO/AI visibility analyzer with crawler checks, llms generator, citability scorer, entity checker, ai readiness checker |
+| 22 | docs: Update AGENT_HANDOFF.md — Tickets 5 and 6 complete (seo-audit, geo-audit) |
+| 23 | feat(packages/reporting): Add models — ReportData, ScoreCard, IssueRow, FixRecommendation, ReportType, ReportFormat |
+| 24 | feat(packages/reporting): Add MarkdownFormatter — renders ReportData as formatted Markdown |
+| 25 | feat(packages/reporting): Add generators — AuditReportGenerator, CrawlSummaryGenerator, ContentReportGenerator |
+| 26 | feat(packages/reporting): Update __init__.py, add __main__.py CLI and README.md |
 
 ## What's Next for Flash Agent
 
-**Start with Ticket 7: Build Report Generator (packages/reporting/)**
+**Start with Ticket 8: Content Brief Generator (packages/content-engine/)**
 
-Produce the report generation package:
-1. `packages/reporting/__init__.py` — public API re-exports
-2. `packages/reporting/models.py` — ReportConfig, ReportSection, ReportData, ReportFormat enums, MarkdownReport, PDFReport models
-3. `packages/reporting/formatters/markdown.py` — MarkdownFormatter class: render_report(), render_score_card(), render_issue_table(), render_fix_list(), render_header()
-4. `packages/reporting/generators/audit_report.py` — AuditReportGenerator: run(audit_report, website_url, format) → ReportData
-5. `packages/reporting/generators/crawl_summary.py` — CrawlSummaryGenerator: run(crawl_result, website_url, format) → ReportData
-6. `packages/reporting/generators/content_report.py` — ContentReportGenerator: run(pages, website_url, format) → ReportData
-7. `packages/reporting/__main__.py` — CLI: `python -m packages.reporting <report_type> <input_json> --format markdown --output report.md`
-8. `packages/reporting/README.md` — Architecture, usage, examples
+Produce the content brief generator package:
+1. `packages/content-engine/__init__.py` — public API re-exports
+2. `packages/content-engine/models.py` — ContentBriefConfig, ContentBrief, SectionSpec, KeywordSpec, IntentSpec
+3. `packages/content-engine/generators/brief_generator.py` — BriefGenerator: run(keywords, website_url, business_profile) → ContentBrief
+4. `packages/content-engine/generators/outline_builder.py` — OutlineBuilder: build_outline(brief) → list[SectionSpec]
+5. `packages/content-engine/__main__.py` — CLI: `python -m packages.content_engine <keywords_file.json>`
+6. `packages/content-engine/README.md` — Architecture, usage, examples
 
 Commit each module separately.
 ---
