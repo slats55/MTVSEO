@@ -1,0 +1,19 @@
+New task from Orion. Before continuing, read these files in exact order:
+1. README.md
+2. AGENT_HANDOFF.md
+3. docs/DECISIONS.md (if exists)
+4. docs/TASK_BOARD.md (if exists)
+5. docs/ROADMAP.md
+6. docs/PROJECT_BRIEF.md
+7. docs/AGENT_ROLES.md
+
+Then create the repository skeleton with these folders:
+apps/web, services/api, packages/crawler, packages/seo-audit, packages/geo-audit, packages/content-engine, packages/schema-engine, packages/reporting, packages/integrations, packages/shared, tests, scripts
+
+Each package needs: __init__.py, README.md, basic module structure.
+
+Then write docs/ARCHITECTURE.md with full technical stack: Next.js frontend, FastAPI backend, SQLAlchemy/Alembic/PostgreSQL, Celery or RQ for queue, storage approach, AI model routing.
+
+After finishing: update AGENT_HANDOFF.md, update docs/DECISIONS.md with stack choices, mark tasks in TASK_BOARD.md if it exists. Commit after folder structure and again after ARCHITECTURE.md.
+
+Work methodically. Do not build features yet.

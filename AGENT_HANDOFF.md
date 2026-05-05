@@ -240,8 +240,39 @@ seo-agent-os/
 - [x] Created migrations/script.py.mako template
 - [x] Created migrations/__init__.py and initial migration version: 20260505_1200_initial_migration.py
 - [x] Updated AGENT_HANDOFF.md with Ticket 2 completed work
+- [x] Created services/api/config.py — Pydantic Settings with DATABASE_URL, REDIS_URL, CELERY_BROKER_URL, SECRET_KEY, CORS_ORIGINS, LOG_LEVEL, ENVIRONMENT; get_settings() singleton cached via @lru_cache
+- [x] Created services/api/database.py — create_async_engine(), async_session_maker, get_db() FastAPI Depends, get_db_context() async ctx manager for Celery/scripts; async SQLAlchemy 2.0 throughout
+- [x] Created services/api/main.py — FastAPI app with lifespan (engine init/dispose), CORS middleware, request logging middleware, GET /health, GET /, RFC 7807 Problem Details exception handler, all four routers registered under /api/v1
+- [x] Created services/api/schemas/__init__.py, business.py, website.py, crawl_run.py, page.py — all Pydantic schemas matching DB models
+- [x] Created services/api/routers/__init__.py, businesses.py, websites.py, crawls.py, pages.py — full CRUD endpoints with filtering (business_id, website_id, crawl_run_id, is_indexable, has_schema), POST /crawls creates PENDING run (Celery enqueue logged as TODO)
+- [x] Updated AGENT_HANDOFF.md with Ticket 3 completed work
+- [x] Created packages/crawler/models.py — CrawlConfig (Pydantic), PageRecord (mirrors DB Page), CrawlResult, CrawlSummary
+- [x] Created packages/crawler/robots_parser.py — RobotParser fetches and caches robots.txt lazily; can_fetch() and get_crawl_delay() methods; fails open if robots.txt unreachable
+- [x] Created packages/crawler/sitemap_parser.py — SitemapParser discovers URLs from <urlset>, <sitemapindex>, nested indexes; reads Sitemap: directives from robots.txt; falls back to well-known candidates; deduplicates by domain
+- [x] Created packages/crawler/page_fetcher.py — PageFetcher async ctx manager wraps httpx.AsyncClient with semaphore concurrency control; fetch_page() obeys robots.txt, enforces delay; _parse_html() extracts title, meta desc, H1/H2, word count, links, images, alt text, schema.org JSON-LD, canonical, noindex meta robots
+- [x] Created packages/crawler/crawl_runner.py — CrawlRunner.run() seeds from sitemap discovery then BFS-crawls up to max_pages and crawl_depth; summary() returns CrawlSummary with aggregate stats
+- [x] Created packages/crawler/crawl_worker.py — Standalone CLI: python -m packages.crawler.crawl_worker <url>; optional --crawl-run-id to update DB; optional Celery task: crawl_website_task.delay() with full config
+- [x] Updated packages/crawler/__init__.py — public API re-exports
+- [x] Updated packages/crawler/README.md — architecture diagram, usage examples (library, Celery, CLI), dependency table, config reference
+- [x] Updated AGENT_HANDOFF.md with Ticket 4 completed work
 
-## Files Created (Ticket 2)
+## Files Created (Ticket 3)
+
+- services/api/config.py — Pydantic BaseSettings, get_settings() singleton
+- services/api/database.py — async SQLAlchemy 2.0 engine, session maker, get_db Depends, get_db_context
+- services/api/main.py — FastAPI app (lifespan, CORS, logging, /health, routers)
+- services/api/schemas/__init__.py
+- services/api/schemas/business.py — BusinessCreate, BusinessUpdate, BusinessRead, BusinessList
+- services/api/schemas/website.py — WebsiteCreate, WebsiteUpdate, WebsiteRead, WebsiteList
+- services/api/schemas/crawl_run.py — CrawlRunCreate, CrawlRunRead, CrawlRunList, CrawlRunStatus
+- services/api/schemas/page.py — PageRead, PageList, PageSummary
+- services/api/routers/__init__.py
+- services/api/routers/businesses.py — CRUD
+- services/api/routers/websites.py — CRUD with business_id filter
+- services/api/routers/crawls.py — List, create (PENDING), status, cancel
+- services/api/routers/pages.py — List (multi-filter), get by id, summary, get by URL
+
+## Files Created (Ticket 4)
 
 - docs/DATA_MODEL.md — Full ER diagram and all 20 entity field definitions
 - services/api/models/base.py — Declarative Base, UUIDPrimaryKeyMixin, TimestampMixin
@@ -273,11 +304,35 @@ seo-agent-os/
 - services/api/migrations/script.py.mako
 - services/api/migrations/versions/20260505_1200_initial_migration.py
 
+## Files Created (Ticket 4)
+
+- packages/crawler/models.py — CrawlConfig, PageRecord, CrawlResult, CrawlSummary (Pydantic)
+- packages/crawler/robots_parser.py — RobotParser (async, httpx, tenacity retry)
+- packages/crawler/sitemap_parser.py — SitemapParser (xml.etree, nested sitemap index support)
+- packages/crawler/page_fetcher.py — PageFetcher async ctx manager (httpx + BeautifulSoup + lxml)
+- packages/crawler/crawl_runner.py — CrawlRunner BFS orchestrator with sitemap seeding
+- packages/crawler/crawl_worker.py — standalone CLI + optional Celery task
+- packages/crawler/__init__.py — public API re-exports
+- packages/crawler/README.md — full usage docs
+
 ## Commits
 
-- Commit 1: Folder skeleton + package __init__.py + README.md files
-- Commit 2: docs/ARCHITECTURE.md (full tech stack documentation)
-- Commit 3: docs/DATA_MODEL.md + SQLAlchemy models + Alembic setup + initial migration
+| # | Description |
+|---|---|
+| 1 | Folder skeleton + package __init__.py + README.md files |
+| 2 | docs/ARCHITECTURE.md (full tech stack documentation) |
+| 3 | docs/DATA_MODEL.md + SQLAlchemy models + Alembic setup + initial migration |
+| 4 | packages/shared: types, config, exceptions, logging modules |
+| 5 | services/api: Settings (Pydantic) and async database session maker |
+| 6 | services/api: Pydantic schemas and routers (businesses, websites, crawls, pages) |
+| 7 | services/api: FastAPI app with lifespan, CORS, health check, and routers |
+| 8 | packages/crawler: Pydantic models (CrawlConfig, PageRecord, CrawlResult, CrawlSummary) |
+| 9 | packages/crawler: robots_parser.py — robots.txt fetch and can_fetch() |
+| 10 | packages/crawler: sitemap_parser.py — sitemap.xml discovery and URL extraction |
+| 11 | packages/crawler: page_fetcher.py — async HTTP with rate limiting and HTML parsing |
+| 12 | packages/crawler: crawl_runner.py — BFS crawl orchestrator |
+| 13 | packages/crawler: crawl_worker.py — standalone script and optional Celery task |
+| 14 | packages/crawler: __init__.py public API and README.md |
 
 ## What's Next for Flash Agent
 
