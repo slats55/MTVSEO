@@ -279,6 +279,24 @@ seo-agent-os/
 - [x] Created packages/reporting/__main__.py — CLI: audit/crawl/content subcommands with --output flag
 - [x] Created packages/reporting/README.md — architecture, usage examples, CLI reference, score breakdown tables
 - [x] Updated AGENT_HANDOFF.md with Ticket 7 (reporting) completed work
+- [x] Created packages/content-engine/models.py — BusinessContext, ContentBrief, KeywordSpec, KeywordCluster, SectionSpec, OutlineSpec, ProofSource, InternalLinkOpportunity, enums
+- [x] Created packages/content-engine/brief_generator.py — BriefGenerator: creates full ContentBrief from keyword + business profile with intent-aware outline, internal links, compliance flags, CTA, schema type
+- [x] Created packages/content-engine/keyword_clusterer.py — KeywordClusterer: Jaccard similarity-based clustering of KeywordSpecs into KeywordClusters by intent
+- [x] Created packages/content-engine/content_planner.py — ContentPlanner: builds prioritized content calendar from keyword clusters
+- [x] Created packages/content-engine/__main__.py — CLI: brief/cluster/plan subcommands
+- [x] Updated packages/content-engine/__init__.py and README.md — public API and full docs
+- [x] Updated AGENT_HANDOFF.md with Ticket 8 (content-engine) completed work
+- [x] Created packages/schema-engine/models.py — SchemaContext, SchemaType, ValidationResult, GeoCoordinates, PostalAddress, OpeningHours, ValidationError
+- [x] Created packages/schema-engine/validator.py — SchemaValidator: checks required fields, URL/email/phone/date formats, recommended properties
+- [x] Created packages/schema-engine/generators/org_schema.py — OrganizationSchemaGenerator
+- [x] Created packages/schema-engine/generators/local_business_schema.py — LocalBusinessSchemaGenerator with address, geo, openingHours, areaServed
+- [x] Created packages/schema-engine/generators/website_schema.py — WebSiteSchemaGenerator with optional SearchAction
+- [x] Created packages/schema-engine/generators/service_schema.py — ServiceSchemaGenerator
+- [x] Created packages/schema-engine/generators/faq_schema.py — FAQSchemaGenerator: question/answer pairs → FAQPage JSON-LD
+- [x] Created packages/schema-engine/generators/article_schema.py — ArticleSchemaGenerator / BlogPosting
+- [x] Created packages/schema-engine/__main__.py — CLI: org/local/website/service/faq/article/validate subcommands
+- [x] Updated packages/schema-engine/__init__.py and README.md — public API and full docs
+- [x] Updated AGENT_HANDOFF.md with Ticket 9 (schema-engine) completed work
 
 ## Files Created (Ticket 7 — reporting)
 
@@ -365,6 +383,31 @@ seo-agent-os/
 - packages/geo-audit/__init__.py — public API re-exports
 - packages/geo-audit/README.md
 
+## Files Created (Ticket 8 — content-engine)
+
+- packages/content-engine/models.py — BusinessContext, ContentBrief, KeywordSpec, KeywordCluster, SectionSpec, OutlineSpec, ProofSource, InternalLinkOpportunity, enums
+- packages/content-engine/brief_generator.py — BriefGenerator: intent-aware outline, internal links, compliance flags, CTA, schema type
+- packages/content-engine/keyword_clusterer.py — KeywordClusterer: Jaccard similarity-based keyword clustering by intent
+- packages/content-engine/content_planner.py — ContentPlanner: prioritized content calendar from keyword clusters
+- packages/content-engine/__main__.py — CLI: brief/cluster/plan subcommands
+- packages/content-engine/__init__.py — public API re-exports
+- packages/content-engine/README.md
+
+## Files Created (Ticket 9 — schema-engine)
+
+- packages/schema-engine/models.py — SchemaContext, SchemaType, ValidationResult, GeoCoordinates, PostalAddress, OpeningHours
+- packages/schema-engine/validator.py — SchemaValidator: required fields, URL/email/phone/date format checks
+- packages/schema-engine/generators/org_schema.py — OrganizationSchemaGenerator
+- packages/schema-engine/generators/local_business_schema.py — LocalBusinessSchemaGenerator with address, geo, openingHours, areaServed
+- packages/schema-engine/generators/website_schema.py — WebSiteSchemaGenerator with optional SearchAction
+- packages/schema-engine/generators/service_schema.py — ServiceSchemaGenerator
+- packages/schema-engine/generators/faq_schema.py — FAQSchemaGenerator: FAQPage JSON-LD from question/answer pairs
+- packages/schema-engine/generators/article_schema.py — ArticleSchemaGenerator / BlogPosting
+- packages/schema-engine/generators/__init__.py
+- packages/schema-engine/__init__.py — public API re-exports
+- packages/schema-engine/__main__.py — CLI: org/local/website/service/faq/article/validate
+- packages/schema-engine/README.md
+
 ## Commits
 
 | # | Description |
@@ -393,20 +436,24 @@ seo-agent-os/
 | 24 | feat(packages/reporting): Add MarkdownFormatter — renders ReportData as formatted Markdown |
 | 25 | feat(packages/reporting): Add generators — AuditReportGenerator, CrawlSummaryGenerator, ContentReportGenerator |
 | 26 | feat(packages/reporting): Update __init__.py, add __main__.py CLI and README.md |
+| 27 | feat(packages/content-engine): Add content brief generator with BriefGenerator, KeywordClusterer, ContentPlanner, models, CLI |
+| 28 | feat(packages/schema-engine): Add JSON-LD schema generator with Organization, LocalBusiness, WebSite, Service, FAQ, Article generators + validator |
 
 ## What's Next for Flash Agent
 
-**Start with Ticket 8: Content Brief Generator (packages/content-engine/)**
+**Start with Ticket 10: Dashboard MVP (apps/web/)**
 
-Produce the content brief generator package:
-1. `packages/content-engine/__init__.py` — public API re-exports
-2. `packages/content-engine/models.py` — ContentBriefConfig, ContentBrief, SectionSpec, KeywordSpec, IntentSpec
-3. `packages/content-engine/generators/brief_generator.py` — BriefGenerator: run(keywords, website_url, business_profile) → ContentBrief
-4. `packages/content-engine/generators/outline_builder.py` — OutlineBuilder: build_outline(brief) → list[SectionSpec]
-5. `packages/content-engine/__main__.py` — CLI: `python -m packages.content_engine <keywords_file.json>`
-6. `packages/content-engine/README.md` — Architecture, usage, examples
+Build the Next.js dashboard with:
+1. `apps/web/package.json` — Next.js 14, React, Tailwind CSS, Lucide icons, React Query
+2. `apps/web/next.config.js` — Next.js config with TypeScript
+3. `apps/web/src/app/layout.tsx` — Root layout with dark theme, sidebar navigation
+4. `apps/web/src/app/page.tsx` — Main dashboard: business selector, SEO score card, GEO score card, recent crawl status, quick actions
+5. `apps/web/src/app/businesses/page.tsx` — Business management: list, add, view
+6. `apps/web/src/app/audits/page.tsx` — Audit dashboard: score breakdown, issue list with severity filters, opportunity list
+7. `apps/web/src/app/reports/page.tsx` — Report viewer: list saved reports, view markdown reports, download
+8. `apps/web/README.md` — Setup instructions, API endpoints reference, environment variables
 
-Commit each module separately.
+Commit each file/group separately.
 ---
 
 ## Handoff Protocol
