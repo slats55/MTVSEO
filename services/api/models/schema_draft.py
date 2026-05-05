@@ -1,0 +1,30 @@
+# SchemaDraft model.
+
+from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+from .enums import SchemaStatus
+
+
+class SchemaDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "schema_drafts"
+
+    website_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
+    page_url: Mapped[str | None] = mapped_column(String(2000))
+    schema_type: Mapped[str | None] = mapped_column(String(100))
+    schema_data: Mapped[dict | None] = mapped_column(JSON, default=dict)
+    is_valid: Mapped[bool] = mapped_column(Boolean, default=True)
+    validation_errors: Mapped[dict | None] = mapped_column(JSON, default=dict)
+    status: Mapped[SchemaStatus] = mapped_column(
+        SchemaStatus, default=SchemaStatus.DRAFT, nullable=False
+    )
+
+    # Relationships
+    website = relationship("Website", back_populates="schema_drafts")
+
+
+import uuid

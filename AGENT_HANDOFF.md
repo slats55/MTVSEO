@@ -232,27 +232,52 @@ seo-agent-os/
 - [x] Added __init__.py and README.md to each package with documented purpose, structure, key classes/functions, and dependencies
 - [x] Wrote docs/ARCHITECTURE.md with full tech stack documentation (Next.js, FastAPI, PostgreSQL, Celery, AI routing, storage, security, compliance)
 - [x] Updated AGENT_HANDOFF.md with completed work
+- [x] Created docs/DATA_MODEL.md with all 20 entity definitions (User, Business, Website, Competitor, CrawlRun, Page, PageSnapshot, SeoIssue, GeoIssue, Keyword, TopicCluster, ContentBrief, ContentDraft, InternalLinkOpportunity, SchemaDraft, PublishingJob, Report, MetricSnapshot, AgentTask, AgentRunLog)
+- [x] Created services/api/models/ with base.py, enums.py, and all 20 SQLAlchemy model files
+- [x] Created services/api/models/__init__.py exporting all models and enums
+- [x] Created alembic.ini (at services/api/alembic.ini) pointing to services/api/migrations/
+- [x] Created migrations/env.py with model import and DATABASE_URL from environment
+- [x] Created migrations/script.py.mako template
+- [x] Created migrations/__init__.py and initial migration version: 20260505_1200_initial_migration.py
+- [x] Updated AGENT_HANDOFF.md with Ticket 2 completed work
 
-## Files Created
+## Files Created (Ticket 2)
 
-- apps/web/__init__.py, apps/web/README.md
-- services/api/__init__.py, services/api/README.md
-- packages/crawler/__init__.py, packages/crawler/README.md
-- packages/seo-audit/__init__.py, packages/seo-audit/README.md
-- packages/geo-audit/__init__.py, packages/geo-audit/README.md
-- packages/content-engine/__init__.py, packages/content-engine/README.md
-- packages/schema-engine/__init__.py, packages/schema-engine/README.md
-- packages/reporting/__init__.py, packages/reporting/README.md
-- packages/integrations/__init__.py, packages/integrations/README.md
-- packages/shared/__init__.py, packages/shared/README.md
-- tests/__init__.py, tests/README.md
-- scripts/__init__.py, scripts/README.md
-- docs/ARCHITECTURE.md
+- docs/DATA_MODEL.md — Full ER diagram and all 20 entity field definitions
+- services/api/models/base.py — Declarative Base, UUIDPrimaryKeyMixin, TimestampMixin
+- services/api/models/enums.py — All enum types (UserRole, CrawlStatus, IssueSeverity, etc.)
+- services/api/models/user.py
+- services/api/models/business.py
+- services/api/models/website.py
+- services/api/models/competitor.py
+- services/api/models/crawl_run.py
+- services/api/models/page.py
+- services/api/models/page_snapshot.py
+- services/api/models/seo_issue.py
+- services/api/models/geo_issue.py
+- services/api/models/keyword.py
+- services/api/models/topic_cluster.py
+- services/api/models/content_brief.py
+- services/api/models/content_draft.py
+- services/api/models/internal_link_opportunity.py
+- services/api/models/schema_draft.py
+- services/api/models/publishing_job.py
+- services/api/models/report.py
+- services/api/models/metric_snapshot.py
+- services/api/models/agent_task.py
+- services/api/models/agent_run_log.py
+- services/api/models/__init__.py — Re-exports all models and enums
+- services/api/alembic.ini
+- services/api/migrations/__init__.py
+- services/api/migrations/env.py
+- services/api/migrations/script.py.mako
+- services/api/migrations/versions/20260505_1200_initial_migration.py
 
 ## Commits
 
 - Commit 1: Folder skeleton + package __init__.py + README.md files
 - Commit 2: docs/ARCHITECTURE.md (full tech stack documentation)
+- Commit 3: docs/DATA_MODEL.md + SQLAlchemy models + Alembic setup + initial migration
 
 ## What's Next for Flash Agent
 
