@@ -255,8 +255,23 @@ seo-agent-os/
 - [x] Updated packages/crawler/__init__.py — public API re-exports
 - [x] Updated packages/crawler/README.md — architecture diagram, usage examples (library, Celery, CLI), dependency table, config reference
 - [x] Updated AGENT_HANDOFF.md with Ticket 4 completed work
+- [x] Created packages/seo-audit/models.py — AuditIssue, AuditScore, AuditReport, IssueSeverity, IssueCategory (6 categories, 5 severity levels)
+- [x] Created packages/seo-audit/analyzers/ — 8 analyzers: title, meta, heading, canonical, schema, image, link, tech; each returns (list[Issue], score_component)
+- [x] Created packages/seo-audit/scorer.py — Weighted 0-100 scoring: Crawlability 20, Indexability 20, On-page SEO 30, Performance 10, Structured Data 10, Security 10; severity-based penalty multipliers
+- [x] Created packages/seo-audit/reporter.py — AuditReporter.run(pages, crawl_result) orchestrates all analyzers, computes score, returns AuditReport
+- [x] Created packages/seo-audit/__main__.py — CLI: python -m packages.seo_audit <crawl_result_json> with --output, --verbose, --min-severity options
+- [x] Updated packages/seo-audit/__init__.py — re-exports public API
+- [x] Updated packages/seo-audit/README.md — architecture, score model, usage examples
+- [x] Updated AGENT_HANDOFF.md with Ticket 5 (seo-audit) completed work
+- [x] Created packages/geo-audit/models.py — GeoIssueSeverity, GeoIssueCategory, GeoIssue, GeoScore (7 categories summing to /100), GeoAuditReport with llms.txt draft
+- [x] Created packages/geo-audit/analyzers/ — 5 analyzers: crawler_checker, llms_generator, citability_scorer, entity_checker, ai_readiness_checker
+- [x] Created packages/geo-audit/scorer.py — Weighted 0-100: AI Crawler Access 15, Entity Clarity 15, Citability 25, Content Depth 20, Schema Markup 10, llms.txt 15
+- [x] Created packages/geo-audit/reporter.py — GeoAuditReporter.run() orchestrates all analyzers, produces GeoAuditReport
+- [x] Created packages/geo-audit/__main__.py — CLI: python -m packages.geo_audit <crawl_result_json> with --robots, --domain, --output
+- [x] Updated packages/geo-audit/__init__.py and README.md — public API and full docs
+- [x] Updated AGENT_HANDOFF.md with Ticket 6 (geo-audit) completed work
 
-## Files Created (Ticket 3)
+## Files Created (Ticket 5 — seo-audit)
 
 - services/api/config.py — Pydantic BaseSettings, get_settings() singleton
 - services/api/database.py — async SQLAlchemy 2.0 engine, session maker, get_db Depends, get_db_context
@@ -312,8 +327,23 @@ seo-agent-os/
 - packages/crawler/page_fetcher.py — PageFetcher async ctx manager (httpx + BeautifulSoup + lxml)
 - packages/crawler/crawl_runner.py — CrawlRunner BFS orchestrator with sitemap seeding
 - packages/crawler/crawl_worker.py — standalone CLI + optional Celery task
-- packages/crawler/__init__.py — public API re-exports
-- packages/crawler/README.md — full usage docs
+- packages/seo-audit/__init__.py — public API re-exports
+- packages/seo-audit/README.md
+
+## Files Created (Ticket 6 — geo-audit)
+
+- packages/geo-audit/models.py — GeoIssueSeverity, GeoIssueCategory, GeoIssue, GeoScore, GeoAuditReport
+- packages/geo-audit/analyzers/crawler_checker.py — AI crawler robots.txt checker
+- packages/geo-audit/analyzers/llms_generator.py — llms.txt detector/generator
+- packages/geo-audit/analyzers/citability_scorer.py — per-page citability scoring
+- packages/geo-audit/analyzers/entity_checker.py — entity/schema/social profile checker
+- packages/geo-audit/analyzers/ai_readiness_checker.py — AI answer readiness checker
+- packages/geo-audit/analyzers/__init__.py
+- packages/geo-audit/scorer.py — Weighted 0-100 GEO scoring
+- packages/geo-audit/reporter.py — GeoAuditReporter orchestrator
+- packages/geo-audit/__main__.py — CLI entry point
+- packages/geo-audit/__init__.py — public API re-exports
+- packages/geo-audit/README.md
 
 ## Commits
 
@@ -329,37 +359,31 @@ seo-agent-os/
 | 8 | packages/crawler: Pydantic models (CrawlConfig, PageRecord, CrawlResult, CrawlSummary) |
 | 9 | packages/crawler: robots_parser.py — robots.txt fetch and can_fetch() |
 | 10 | packages/crawler: sitemap_parser.py — sitemap.xml discovery and URL extraction |
-| 11 | packages/crawler: page_fetcher.py — async HTTP with rate limiting and HTML parsing |
-| 12 | packages/crawler: crawl_runner.py — BFS crawl orchestrator |
-| 13 | packages/crawler: crawl_worker.py — standalone script and optional Celery task |
-| 14 | packages/crawler: __init__.py public API and README.md |
+| 13 | packages/crawler: page_fetcher.py — async HTTP with rate limiting and HTML parsing |
+| 14 | packages/crawler: crawl_runner.py — BFS crawl orchestrator |
+| 15 | packages/crawler: crawl_worker.py — standalone script and optional Celery task |
+| 16 | packages/crawler: __init__.py public API and README.md |
+| 17 | packages/seo-audit: Pydantic models and 8 SEO analyzers |
+| 18 | packages/seo-audit: scorer.py and reporter.py |
+| 19 | packages/seo-audit: __init__.py, README.md, __main__.py CLI |
+| 20 | packages/geo-audit: Pydantic models — GeoScore, GeoIssue, GeoAuditReport, GeoIssueSeverity |
+| 21 | packages/geo-audit: Add GEO/AI visibility analyzer with crawler checks, llms generator, citability scorer, entity checker, ai readiness checker |
 
 ## What's Next for Flash Agent
 
-**Start with Ticket 1: Create project documentation and architecture**
+**Start with Ticket 7: Build Report Generator (packages/reporting/)**
 
-Produce ALL Phase 0 docs:
-1. `docs/PROJECT_BRIEF.md` — Full project brief from the spec
-2. `docs/ARCHITECTURE.md` — App architecture decision (Next.js + FastAPI)
-3. `docs/AGENT_ROLES.md` — Define all 10 agent roles with responsibilities
-4. `docs/ROADMAP.md` — Phased roadmap with MVP definition
-5. `docs/DATA_MODEL.md` — Full DB schema for all entities
-6. `docs/API_SPEC.md` — REST API endpoints for all MVP commands
-7. `docs/SEO_AUDIT_SCORING.md` — Technical SEO scoring model
-8. `docs/GEO_AUDIT_SCORING.md` — GEO score model
-9. `docs/CONTENT_WORKFLOW.md` — Content generation and optimization workflow
-10. `docs/PUBLISHING_SAFETY.md` — Safety protocols for publishing
-11. `docs/COMPLIANCE_GUARDRAILS.md` — All 8 guardrails, YMYL rules, cannabis compliance
-12. `docs/DECISIONS.md` — Log key architectural decisions
-13. `README.md` — Project overview and local setup
-14. `.env.example` — Environment variable template
+Produce the report generation package:
+1. `packages/reporting/__init__.py` — public API re-exports
+2. `packages/reporting/models.py` — ReportConfig, ReportSection, ReportData, ReportFormat enums, MarkdownReport, PDFReport models
+3. `packages/reporting/formatters/markdown.py` — MarkdownFormatter class: render_report(), render_score_card(), render_issue_table(), render_fix_list(), render_header()
+4. `packages/reporting/generators/audit_report.py` — AuditReportGenerator: run(audit_report, website_url, format) → ReportData
+5. `packages/reporting/generators/crawl_summary.py` — CrawlSummaryGenerator: run(crawl_result, website_url, format) → ReportData
+6. `packages/reporting/generators/content_report.py` — ContentReportGenerator: run(pages, website_url, format) → ReportData
+7. `packages/reporting/__main__.py` — CLI: `python -m packages.reporting <report_type> <input_json> --format markdown --output report.md`
+8. `packages/reporting/README.md` — Architecture, usage, examples
 
-After Phase 0 docs, proceed to:
-- Ticket 2: Database schema (use SQLAlchemy/PostgreSQL, Alembic migrations)
-- Ticket 3: Website intake API
-- Ticket 4: Safe crawler
-- Ticket 5: Technical SEO analyzer
-
+Commit each module separately.
 ---
 
 ## Handoff Protocol
