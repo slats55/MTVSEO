@@ -1,41 +1,137 @@
-# Reporting Package
+# SEO Agent OS — Reporting Package
 
-Audit report assembly and export.
+Converts crawl results, SEO audit reports, and content analysis into human-readable Markdown reports.
 
-## Overview
+**Format-agnostic design:** report generators produce a `ReportData` intermediate object, formatters turn it into a specific output format. HTML/PDF formatters can be added without changing generators.
 
-Assembles human-readable Markdown reports from audit data and scores. Generates executive summaries, per-page drill-downs, and prioritized recommendation lists. Supports export to PDF (future).
+---
 
-## Report Types
+## Architecture
 
-- **Full Audit Report** — Complete SEO + GEO audit with scores, issues, recommendations
-- **Executive Summary** — High-level scores and top 5 priorities per business
-- **Technical SEO Report** — Detailed technical SEO findings only
-- **GEO Report** — AI visibility findings and llms.txt recommendations
-- **Content Report** — Content briefs, drafts, and optimization suggestions
-- **Implementation Package** — Exportable ZIP of recommendations, schemas, and drafts
+```
+packages/reporting/
+  models.py              # ReportData, ScoreCard, IssueRow, FixRecommendation, enums
+  formatters/
+    markdown.py          # MarkdownFormatter → formatted Markdown string
+  generators/
+    audit_report.py      # AuditReportGenerator: seo_audit + crawl → ReportData
+    crawl_summary.py     # CrawlSummaryGenerator: crawl_result → ReportData
+    content_report.py    # ContentReportGenerator: PageRecord list → ReportData
+  __init__.py           # Public API re-exports
+  __main__.py           # CLI entry point
+  README.md             # This file
+```
 
-## Responsibilities
+---
 
-- Assemble Markdown reports from structured audit data
-- Render Markdown to HTML for web viewing
-- Generate executive summaries with score breakdowns
-- Per-page drill-down sections
-- Prioritized recommendations with effort/impact estimates
-- PDF export (Phase 7+)
-- Report versioning and diffing
+## Public API
 
-## Key Classes / Functions
+```python
+from packages.reporting import (
+    # Models
+    ReportData, ReportMetadata, ReportType, ReportFormat,
+    ScoreCard, IssueRow, FixRecommendation,
+    # Formatters
+    MarkdownFormatter,
+    # Generators
+    AuditReportGenerator,
+    CrawlSummaryGenerator,
+    ContentReportGenerator,
+)
+```
 
-- `ReportGenerator` — main report orchestrator
-- `SeoReportAssembler` — assembles SEO audit sections
-- `GeoReportAssembler` — assembles GEO audit sections
-- `ExecutiveSummaryGenerator` — creates high-level summaries
-- `MarkdownRenderer` — renders Markdown to HTML
-- `PdfExporter` — PDF generation (future)
+---
+
+## Usage
+
+### Library usage
+
+```python
+# Crawl summary report
+from packages.reporting import CrawlSummaryGenerator, MarkdownFormatter
+
+generator = CrawlSummaryGenerator()
+report_data = generator.run(crawl_result, website_url="https://example.com")
+
+formatter = MarkdownFormatter()
+markdown = formatter.render(report_data)
+print(markdown)
+```
+
+```python
+# SEO audit report
+from packages.reporting import AuditReportGenerator, MarkdownFormatter
+
+generator = AuditReportGenerator()
+report_data = generator.run(audit_report, crawl_result, website_url="https://example.com")
+
+formatter = MarkdownFormatter()
+print(formatter.render(report_data))
+```
+
+```python
+# Content analysis report
+from packages.reporting import ContentReportGenerator, MarkdownFormatter
+
+generator = ContentReportGenerator()
+report_data = generator.run(pages_list, website_url="https://example.com")
+print(MarkdownFormatter().render(report_data))
+```
+
+### CLI usage
+
+```bash
+# Generate SEO audit report from a crawl result JSON
+python -m packages.reporting audit crawl_result.json --output seo-report.md
+
+# Generate crawl summary report
+python -m packages.reporting crawl crawl_result.json -o crawl-report.md
+
+# Generate content analysis report from pages JSON
+python -m packages.reporting content pages.json --output content-report.md
+```
+
+---
+
+## Report Format
+
+Each report includes:
+
+| Section | Description |
+|---------|-------------|
+| **Header** | Website URL, timestamp, pages crawled, duration |
+| **Overall Score** | 0-100 score with letter grade and category breakdown table |
+| **Executive Summary** | 2-3 sentence overview of findings |
+| **Key Findings** | Bulleted list of top issues |
+| **Issues Table** | All issues grouped by severity with URL, category, and recommendation |
+| **Priority Fixes** | Sorted table of top fixes with estimated impact |
+| **Supplemental Data** | Per-report extra tables (size distribution, word count, status codes, etc.) |
+| **Footer** | Report generation timestamp |
+
+---
+
+## Score Breakdown
+
+### Crawl Summary Scores
+- **Crawl Coverage** (25%): Pages discovered vs target
+- **Crawl Efficiency** (25%): Error rate (lower is better)
+- **Page Quality** (25%): Average word count and page size
+- **Crawl Health** (25%): Aggregate health metric
+
+### Content Analysis Scores
+- **Titles** (20%): Presence and length (30-60 chars)
+- **Meta Descriptions** (15%): Presence and length (70-160 chars)
+- **Headings** (15%): H1 presence and length
+- **Content Quality** (25%): Word count vs 300-word minimum
+- **Image Optimization** (15%): Alt text coverage
+- **Readability** (10%): Word count as proxy
+
+---
 
 ## Dependencies
 
-- markdown (Python Markdown renderer)
-- jinja2 (templating)
-- packages.shared
+| Package | Purpose |
+|---------|---------|
+| `packages/crawler` | `PageRecord`, `CrawlResult` |
+| `packages/seo-audit` | `AuditReport` (audit generator only) |
+| `packages/shared` | Types, exceptions |
