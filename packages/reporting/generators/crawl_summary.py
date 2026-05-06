@@ -6,7 +6,7 @@ a ReportData intermediate representation.
 
 from datetime import datetime, timezone
 from ...crawler.models import CrawlResult, CrawlSummary, PageRecord
-from ...models import (
+from ...reporting.models import (
     ReportData,
     ReportMetadata,
     ReportType,

@@ -1,6 +1,6 @@
 """LocalBusiness schema generator — extends Organization with local business fields."""
 
-from ...models import (
+from ..models import (
     GeoCoordinates,
     OpeningHours,
     PostalAddress,

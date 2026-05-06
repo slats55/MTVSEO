@@ -26,14 +26,14 @@ from uuid import UUID
 sys.path.insert(0, str(__file__).rsplit("/packages/", 1)[0])
 
 from ..crawl_runner import CrawlRunner
-from ..models import CrawlConfig, CrawlSummary
+from .models import CrawlConfig, CrawlSummary
 from ..shared.config import (
     DEFAULT_CRAWL_DEPTH,
     DEFAULT_CRAWL_DELAY_MS,
     DEFAULT_MAX_PAGES,
     DEFAULT_USER_AGENT,
 )
-from ..shared.logging import get_logger
+from ..shared.shared_logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -2,7 +2,7 @@
 """Check entity optimization — business clearly defined with sameAs schema and social profiles."""
 
 from ...crawler.models import PageRecord
-from ...models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
+from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
 
 
 # Social platform domains to check for in schema sameAs

@@ -11,7 +11,7 @@ import json
 import sys
 from pathlib import Path
 
-from ..models import (
+from .models import (
     BusinessContext,
     ContentFormat,
     ContentGoal,

@@ -2,7 +2,7 @@
 """Analyze images for missing alt text and accessibility issues."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 def analyze(page: PageRecord) -> list[AuditIssue]:

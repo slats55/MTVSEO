@@ -6,7 +6,7 @@ No DB dependency, no audit — pure content analysis.
 
 from datetime import datetime, timezone
 from ...crawler.models import PageRecord, CrawlResult
-from ...models import (
+from ...reporting.models import (
     ReportData,
     ReportMetadata,
     ReportType,

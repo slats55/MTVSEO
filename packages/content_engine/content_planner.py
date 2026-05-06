@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..models import (
+from .models import (
     BusinessContext,
     ContentFormat,
     ContentGoal,

@@ -1,12 +1,12 @@
 # AgentTask model.
 
-from sqlalchemy import String, Text
+import uuid
+from datetime import datetime
+from sqlalchemy import DateTime, Enum, JSON, String, Text, UUID
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import AgentTaskStatus
-
 
 class AgentTask(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "agent_tasks"
@@ -15,7 +15,7 @@ class AgentTask(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     business_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     website_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     status: Mapped[AgentTaskStatus] = mapped_column(
-        AgentTaskStatus, default=AgentTaskStatus.PENDING, nullable=False
+        Enum(AgentTaskStatus), default=AgentTaskStatus.PENDING, nullable=False
     )
     input_data: Mapped[dict | None] = mapped_column(JSON, default=dict)
     result_data: Mapped[dict | None] = mapped_column(JSON, default=dict)
@@ -27,7 +27,3 @@ class AgentTask(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # Relationships
     creator = relationship("User", back_populates="agent_tasks")
     run_logs = relationship("AgentRunLog", back_populates="task", cascade="all, delete-orphan")
-
-
-import uuid
-from datetime import datetime

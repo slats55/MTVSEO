@@ -1,11 +1,10 @@
 # Competitor model.
 
-from sqlalchemy import ForeignKey, String, Text
+import uuid
+from sqlalchemy import ForeignKey, String, Text, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class Competitor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "competitors"
@@ -20,5 +19,3 @@ class Competitor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # Relationships
     business = relationship("Business", back_populates="competitors")
 
-
-import uuid

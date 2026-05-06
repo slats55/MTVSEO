@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from ..shared.logging import get_logger
+from ..shared.shared_logger import get_logger
 
 logger = get_logger(__name__)
 

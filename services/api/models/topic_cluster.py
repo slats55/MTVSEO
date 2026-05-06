@@ -1,11 +1,10 @@
 # TopicCluster model.
 
-from sqlalchemy import ForeignKey, Integer, String
+import uuid
+from sqlalchemy import ForeignKey, Integer, String, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class TopicCluster(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "topic_clusters"
@@ -21,5 +20,3 @@ class TopicCluster(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # Relationships
     website = relationship("Website", back_populates="topic_clusters")
 
-
-import uuid

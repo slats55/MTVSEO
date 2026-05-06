@@ -1,12 +1,11 @@
 # SchemaDraft model.
 
-from sqlalchemy import Boolean, ForeignKey, String
+import uuid
+from sqlalchemy import Boolean, Enum, ForeignKey, JSON, String, UUID
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import SchemaStatus
-
 
 class SchemaDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "schema_drafts"
@@ -20,11 +19,9 @@ class SchemaDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_valid: Mapped[bool] = mapped_column(Boolean, default=True)
     validation_errors: Mapped[dict | None] = mapped_column(JSON, default=dict)
     status: Mapped[SchemaStatus] = mapped_column(
-        SchemaStatus, default=SchemaStatus.DRAFT, nullable=False
+        Enum(SchemaStatus), default=SchemaStatus.DRAFT, nullable=False
     )
 
     # Relationships
     website = relationship("Website", back_populates="schema_drafts")
 
-
-import uuid

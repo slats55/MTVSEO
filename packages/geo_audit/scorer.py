@@ -1,7 +1,7 @@
 # packages/geo-audit/scorer.py
 """Compute the 0-100 GEO / AI visibility score from issues and page metrics."""
 
-from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity, GeoScore
+from .models import GeoIssue, GeoIssueCategory, GeoIssueSeverity, GeoScore
 
 
 # Weights (sum = 100)

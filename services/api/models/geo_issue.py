@@ -1,12 +1,11 @@
 # GeoIssue model.
 
-from sqlalchemy import Float, ForeignKey, String, Text
+import uuid
+from sqlalchemy import Enum, Float, ForeignKey, String, Text, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import IssueSeverity
-
 
 class GeoIssue(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "geo_issues"
@@ -18,7 +17,7 @@ class GeoIssue(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), nullable=False, index=True
     )
     issue_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    severity: Mapped[IssueSeverity] = mapped_column(IssueSeverity, nullable=False)
+    severity: Mapped[IssueSeverity] = mapped_column(Enum(IssueSeverity), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     recommendation: Mapped[str | None] = mapped_column(Text)
@@ -28,5 +27,3 @@ class GeoIssue(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     page = relationship("Page", back_populates="geo_issues")
     crawl_run = relationship("CrawlRun", back_populates="geo_issues")
 
-
-import uuid

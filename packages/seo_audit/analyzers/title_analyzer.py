@@ -2,7 +2,7 @@
 """Analyze page titles for SEO quality issues."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 TITLE_MIN_LEN = 30

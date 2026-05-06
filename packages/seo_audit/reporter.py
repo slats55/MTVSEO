@@ -5,14 +5,14 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from ..crawler.models import CrawlResult, PageRecord
-from ..models import (
+from .models import (
     AuditIssue,
     AuditReport,
     AuditScore,
     IssueCategory,
     IssueSeverity,
 )
-from ..scorer import compute_score
+from .scorer import compute_score
 
 
 class AuditReporter:
@@ -132,7 +132,7 @@ class AuditReporter:
     ) -> None:
         """Run all analyzers against a single page."""
         # Lazy import to avoid circular dependency
-        from ..analyzers import (
+        from .analyzers import (
             analyze_titles, analyze_meta, analyze_headings,
             analyze_canonical, analyze_schema, analyze_images,
             analyze_links, analyze_tech,

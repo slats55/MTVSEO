@@ -2,7 +2,7 @@
 """Check AI answer readiness — how well content answers customer questions and serves GEO."""
 
 from ...crawler.models import PageRecord
-from ...models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
+from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
 
 
 # Question patterns that indicate a page tries to answer customer questions

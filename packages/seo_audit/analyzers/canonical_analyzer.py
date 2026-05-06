@@ -2,7 +2,7 @@
 """Analyze canonical URL tags for duplicate content and self-referencing issues."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 def analyze(page: PageRecord) -> list[AuditIssue]:

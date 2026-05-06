@@ -15,7 +15,7 @@ import json
 import sys
 from pathlib import Path
 
-from ..models import SchemaType, ValidationResult
+from .models import SchemaType, ValidationResult
 from ..validator import SchemaValidator
 from ..generators import (
     OrganizationSchemaGenerator,
@@ -90,7 +90,7 @@ def cmd_article(args) -> None:
 def cmd_validate(args) -> None:
     schema_data = json.loads(Path(args.schema_json).read_text())
     # Reconstruct SchemaContext
-    from ..models import SchemaContext
+    from .models import SchemaContext
     schema = SchemaContext(
         schema_type=SchemaType(schema_data.get("@type", "Organization")),
         data={k: v for k, v in schema_data.items() if not k.startswith("@")},

@@ -11,9 +11,9 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from bs4 import BeautifulSoup
 
-from ..models import CrawlConfig, PageRecord
-from ..robots_parser import RobotParser
-from ..shared.logging import get_logger
+from .models import CrawlConfig, PageRecord
+from .robots_parser import RobotParser
+from ..shared.shared_logger import get_logger
 
 logger = get_logger(__name__)
 

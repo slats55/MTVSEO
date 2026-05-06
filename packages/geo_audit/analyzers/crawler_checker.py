@@ -8,7 +8,7 @@ Reports which are allowed, blocked, or unspecified.
 from urllib.parse import urlparse
 
 from ...crawler.models import PageRecord
-from ...models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
+from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
 
 
 # Well-known AI / search crawlers

@@ -4,7 +4,7 @@
 import logging
 import sys
 
-from ..config import (
+from .config import (
     APP_NAME,
     LOG_DATE_FORMAT,
     LOG_FORMAT,

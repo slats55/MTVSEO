@@ -1,6 +1,6 @@
 """WebSite schema generator."""
 
-from ...models import SchemaContext, SchemaType
+from ..models import SchemaContext, SchemaType
 
 
 class WebSiteSchemaGenerator:

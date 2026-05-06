@@ -2,7 +2,7 @@
 """Analyze meta description tags for SEO quality issues."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 META_DESC_MIN_LEN = 120

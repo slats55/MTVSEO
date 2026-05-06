@@ -5,7 +5,7 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from ..crawler.models import CrawlResult, PageRecord
-from ..analyzers import (
+from .analyzers import (
     analyze_crawler_access,
     analyze_llms_txt,
     generate_llms_txt_draft,
@@ -13,8 +13,8 @@ from ..analyzers import (
     analyze_entities,
     analyze_ai_readiness,
 )
-from ..models import GeoIssue, GeoAuditReport, GeoIssueCategory, GeoIssueSeverity
-from ..scorer import compute_score
+from .models import GeoIssue, GeoAuditReport, GeoIssueCategory, GeoIssueSeverity
+from .scorer import compute_score
 
 
 class GeoAuditReporter:

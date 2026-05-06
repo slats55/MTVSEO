@@ -7,7 +7,7 @@ intermediate representation suitable for any output formatter.
 from datetime import datetime, timezone
 from ...seo_audit.models import AuditReport, AuditIssue, AuditScore
 from ...seo_audit.scorer import compute_score
-from ...models import (
+from ...reporting.models import (
     ReportData,
     ReportMetadata,
     ReportType,

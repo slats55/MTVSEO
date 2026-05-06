@@ -1,6 +1,6 @@
 """Article / BlogPosting schema generator."""
 
-from ...models import SchemaContext, SchemaType
+from ..models import SchemaContext, SchemaType
 
 
 class ArticleSchemaGenerator:

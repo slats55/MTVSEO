@@ -9,7 +9,7 @@ but important for GEO.
 from urllib.parse import urljoin, urlparse
 
 from ...crawler.models import PageRecord
-from ...models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
+from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
 
 
 LLMS_TXT_PATHS = [

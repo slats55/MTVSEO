@@ -143,11 +143,11 @@ class ContentBrief:
     audience_pain_points: list[str] = field(default_factory=list)
     audience_search_questions: list[str] = field(default_factory=list)
     # Keywords
-    primary_keyword: str
+    primary_keyword: str = ""
     secondary_keywords: list[str] = field(default_factory=list)
     keyword_clusters: list[KeywordCluster] = field(default_factory=list)
     # Intent
-    search_intent: SearchIntent
+    search_intent: SearchIntent = SearchIntent.INFORMATIONAL
     intent_rationale: str = ""            # why this intent matches the audience
     # Outline
     outline: OutlineSpec = field(default_factory=OutlineSpec)

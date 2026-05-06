@@ -7,7 +7,7 @@ No external API needed.
 from typing import Optional
 import uuid
 
-from ..models import KeywordCluster, KeywordSpec, SearchIntent
+from .models import KeywordCluster, KeywordSpec, SearchIntent
 
 
 # Stopwords to remove when computing overlap

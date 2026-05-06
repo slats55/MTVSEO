@@ -11,7 +11,7 @@ Scoring model (sum = 100):
   Security:            5 pts
 """
 
-from ..models import AuditIssue, AuditScore, IssueCategory, IssueSeverity
+from .models import AuditIssue, AuditScore, IssueCategory, IssueSeverity
 
 
 # ─── Weights (must sum to 100) ────────────────────────────────────────────────

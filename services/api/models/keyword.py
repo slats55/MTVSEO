@@ -1,12 +1,11 @@
 # Keyword model.
 
-from sqlalchemy import Float, ForeignKey, Integer, String
+import uuid
+from sqlalchemy import Enum, Float, ForeignKey, Integer, String, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import KeywordIntent
-
 
 class Keyword(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "keywords"
@@ -15,7 +14,7 @@ class Keyword(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), nullable=False, index=True
     )
     keyword: Mapped[str] = mapped_column(String(500), nullable=False)
-    intent: Mapped[KeywordIntent | None] = mapped_column(KeywordIntent)
+    intent: Mapped[KeywordIntent | None] = mapped_column(Enum(KeywordIntent))
     volume: Mapped[int | None] = mapped_column(Integer)
     difficulty: Mapped[float | None] = mapped_column(Float)
     current_rank: Mapped[int | None] = mapped_column(Integer)
@@ -25,5 +24,3 @@ class Keyword(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     website = relationship("Website", back_populates="keywords")
     content_briefs = relationship("ContentBrief", back_populates="keyword")
 
-
-import uuid

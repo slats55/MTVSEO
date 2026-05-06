@@ -1,11 +1,10 @@
 # PageSnapshot model — one-to-one with Page.
 
-from sqlalchemy import LargeBinary, String
+import uuid
+from sqlalchemy import JSON, LargeBinary, String, Text, UUID
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class PageSnapshot(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "page_snapshots"
@@ -23,5 +22,3 @@ class PageSnapshot(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # Relationships
     page = relationship("Page", back_populates="snapshot")
 
-
-import uuid

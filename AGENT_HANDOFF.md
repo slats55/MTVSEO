@@ -501,3 +501,129 @@ All 10 MVP tickets are complete. Remaining work:
 - WSL path mapping: `/mnt/c/Users/mtval/Projects/seo-agent-os`
 - Worktree rule: never commit to main, never merge into main, never push to GitHub unless explicitly told
 - This project has no remote configured yet
+
+---
+
+## Stabilization Pass — chore/stabilize-runtime
+
+**Branch:** `chore/stabilize-runtime` (created from `master`)
+**Previous commit on master:** `ce97499` — "docs: Update AGENT_HANDOFF.md — All 10 MVP tickets complete"
+**Commit 1 on this branch:** `8a599b0` — "fix: normalize package imports, rename logging.py to avoid stdlib shadow"
+**New commit:** (pending) — "fix: complete backend runtime stabilization"
+
+### What Was Fixed
+
+#### Package Directory Renames
+Hyphenated package directories were renamed to underscores. The original code used `from packages.seo_audit` style imports but the directories were `seo-audit/`, `geo-audit/`, `content-engine/`, `schema-engine/` — this was structurally broken and could never import.
+
+```
+seo-audit/     → seo_audit/
+geo-audit/     → geo_audit/
+content-engine/→ content_engine/
+schema-engine/ → schema_engine/
+```
+Done via `git mv` to preserve history. All 121+ internal imports were updated from absolute (`from packages.X`) to relative (`from ..X`, `from ...X`, etc.).
+
+#### shared/logging.py Renamed
+`packages/shared/logging.py` shadowed Python's stdlib `logging` module. Renamed to `packages/shared/shared_logger.py`. Updated `packages/shared/config.py` and `packages/shared/__init__.py` to import from `.shared_logger`.
+
+#### services/api/models/ Import Ordering
+All 20 model files in `services/api/models/` had imports scattered mid-file (after class definitions) rather than at the top. Rewritten to proper top-of-file placement. Also:
+- Added missing `Integer`, `Text`, `DateTime`, `Enum` SQLAlchemy imports
+- Wrapped all `Mapped[EnumType]` columns with `Enum(EnumType)` for SQLAlchemy 2.x
+- Renamed `metadata` → `extra_data` in `agent_run_log.py` (reserved SQLAlchemy attribute)
+- Fixed `Mapped[DateType]` → `Mapped[date]` in `metric_snapshot.py`
+
+#### packages/ Relative Import Dot Counts
+Multiple packages had wrong dot counts in relative imports:
+- `packages/crawler/` files: `from ..page_fetcher` → `from .page_fetcher` (same-package, 1 dot not 2)
+- `packages/seo_audit/` and `packages/geo_audit/`: `from ..models` → `from .models`, `from ..scorer` → `from .scorer`
+- `packages/seo_audit/analyzers/__init__.py` and `packages/geo_audit/analyzers/__init__.py`: `from ....analyzers.X` → `from ...analyzers.X` (3 dots not 4)
+- `packages/schema_engine/generators/__init__.py`: `from ...generators.X` → `from .X` (1 dot not 3)
+- `packages/schema_engine/generators/*.py`: `from ...models` → `from ..models` (2 dots not 3)
+- `packages/reporting/formatters/__init__.py`: `from ...formatters.markdown` → `from .markdown` (1 dot not 3)
+- `packages/reporting/generators/__init__.py`: `from ...generators.X` → `from .X` (1 dot not 3)
+
+#### content_engine/models.py Dataclass Ordering
+`ContentBrief` had required fields (`primary_keyword`, `search_intent`) after default fields, violating dataclass rules. Added defaults:
+- `primary_keyword: str = ""`
+- `search_intent: SearchIntent = SearchIntent.INFORMATIONAL`
+
+#### geo_audit/models.py Missing Enum Value
+`GeoIssueCategory.SCHEMA` was referenced in `scorer.py` but missing from the enum. Added `SCHEMA = "SCHEMA"`.
+
+#### schema_engine/models.py Unused Import
+`from dataclass_wizard import field` was failing because `field` is not exported from dataclass_wizard. Removed the unused import.
+
+#### Missing Dependencies Added
+- `tenacity` (crawler/robots_parser.py)
+- `email-validator` + `dnspython` (Pydantic EmailStr)
+- `python-slugify` (content_engine/brief_generator.py)
+- `dataclass-wizard` (schema_engine — installed but import removed as unused)
+
+### Dependencies Added to requirements.txt
+```
+tenacity>=8.2.0
+email-validator>=2.1.0
+dnspython>=2.4.0
+python-slugify>=8.0.0
+dataclass-wizard>=0.19.0
+```
+
+### Commands Run
+```bash
+# Create and activate venv
+sudo apt-get install -y python3.12-venv
+python3 -m venv .venv
+.venv/bin/python3 -m ensurepip
+.venv/bin/python3 -m pip install pip --upgrade --target=.venv/lib/python3.12/site-packages/
+# Bootstrap pip wrapper
+echo '#!/bin/sh' > .venv/bin/pip3
+echo 'exec .venv/bin/python3 -m pip "$@"' >> .venv/bin/pip3
+chmod +x .venv/bin/pip3
+
+# Install deps
+.venv/bin/pip3 install -r requirements.txt
+.venv/bin/pip3 install -r requirements-dev.txt
+.venv/bin/pip3 install tenacity email-validator dnspython python-slugify dataclass-wizard
+
+# Verify
+PYTHONPATH=. .venv/bin/python3 -m compileall packages services/api
+PYTHONPATH=. .venv/bin/python3 scripts/verify_local.py
+PYTHONPATH=. .venv/bin/python3 -m pytest tests/test_backend_smoke.py -q
+```
+
+### Test Results
+```
+verify_local.py: ALL CHECKS PASSED — repo is ready for Codex
+pytest: 4 passed, 6 warnings
+```
+
+### Warnings (Non-Breaking)
+- **PydanticDeprecatedSince20**: `Settings` class uses class-based `config = ...` which is deprecated in Pydantic V3. Fix: convert to `model_config = ConfigDict(...)`.
+- **geo_audit UserWarning**: Field name "schema" in `GeoScore` shadows an attribute in parent `BaseModel`. Cosmetic — can rename field to `schema_data` or `schema_org` to fix.
+
+### Files Changed (Uncommitted)
+- `requirements.txt` — added tenacity, email-validator, dnspython, python-slugify, dataclass-wizard
+- `packages/schema_engine/models.py` — removed unused dataclass_wizard import
+- `packages/schema_engine/generators/__init__.py` — fixed dot counts
+- `packages/schema_engine/generators/*.py` — fixed `from ...models` → `from ..models`
+- `packages/reporting/formatters/__init__.py` — fixed `from ...formatters.markdown` → `from .markdown`
+- `packages/reporting/generators/__init__.py` — fixed `from ...generators.X` → `from .X`
+- `services/api/config.py` — restored `settings = get_settings()` singleton
+- `scripts/verify_local.py` — fixed GeoScoreBreakdown → GeoScore, DATABASE_URL → database_url
+- `tests/test_backend_smoke.py` — fixed title assertion, GeoScoreBreakdown → GeoScore, DATABASE_URL → database_url
+
+### For Codex Agent
+**Branch from `chore/stabilize-runtime`** — it is the clean, importable, testable handoff branch.
+
+**Preserve these conventions:**
+1. **Underscore package names**: `seo_audit`, `geo_audit`, `content_engine`, `schema_engine` — NOT hyphenated
+2. **Relative imports**: all intra-package imports use `.` (1 dot for same-package), `..` (2 dots for sibling packages in `packages/`), `...` (3 dots for sub-packages), `....` (4 dots for `services/api/` → `packages/`)
+3. **`shared_logger.py`**: not `logging.py` — stdlib shadow issue
+4. **SQLAlchemy Enum wrapping**: `Mapped[EnumType]` must use `Enum(EnumType)` in `mapped_column()`
+5. **Dataclass field ordering**: no-default fields before default fields
+6. **PYTHONPATH**: always set `PYTHONPATH=.` at repo root when running Python commands
+7. **venv pip**: `.venv/bin/pip3` — NOT `.venv/bin/pip`
+8. **Settings attribute**: `settings.database_url` (lowercase), NOT `DATABASE_URL`
+9. **App title**: `"SEO Agent OS API"`, not `"SEO Agent OS"`

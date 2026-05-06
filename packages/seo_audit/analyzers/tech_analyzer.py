@@ -2,7 +2,7 @@
 """Analyze technical SEO issues: HTTP status codes, redirects, robots meta, indexability."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 def analyze(page: PageRecord) -> list[AuditIssue]:

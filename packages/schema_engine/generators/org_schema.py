@@ -1,6 +1,6 @@
 """Organization schema generator."""
 
-from ...models import SchemaContext, SchemaType
+from ..models import SchemaContext, SchemaType
 
 
 class OrganizationSchemaGenerator:

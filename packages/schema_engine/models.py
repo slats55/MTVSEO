@@ -1,6 +1,5 @@
 """JSON-LD schema data models — no database dependency."""
 
-from dataclass_wizard import field
 from dataclasses import dataclass, field as _field
 from enum import Enum
 from typing import Optional

@@ -1,11 +1,10 @@
 # Website model.
 
-from sqlalchemy import ForeignKey, String
+import uuid
+from sqlalchemy import ForeignKey, String, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class Website(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "websites"
@@ -28,5 +27,3 @@ class Website(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
-
-import uuid

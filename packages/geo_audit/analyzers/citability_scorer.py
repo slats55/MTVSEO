@@ -15,7 +15,7 @@ Returns a per-page citability score (0-100) and per-page GeoIssues.
 """
 
 from ...crawler.models import PageRecord
-from ...models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
+from ..models import GeoIssue, GeoIssueCategory, GeoIssueSeverity
 
 
 # Minimum word counts for content to be considered substantive

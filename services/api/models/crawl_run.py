@@ -1,12 +1,12 @@
 # CrawlRun model.
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+import uuid
+from datetime import datetime
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import CrawlStatus
-
 
 class CrawlRun(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "crawl_runs"
@@ -15,7 +15,7 @@ class CrawlRun(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), nullable=False, index=True
     )
     status: Mapped[CrawlStatus] = mapped_column(
-        CrawlStatus, default=CrawlStatus.PENDING, nullable=False
+        Enum(CrawlStatus), default=CrawlStatus.PENDING, nullable=False
     )
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -31,6 +31,3 @@ class CrawlRun(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     seo_issues = relationship("SeoIssue", back_populates="crawl_run", cascade="all, delete-orphan")
     geo_issues = relationship("GeoIssue", back_populates="crawl_run", cascade="all, delete-orphan")
 
-
-import uuid
-from datetime import datetime

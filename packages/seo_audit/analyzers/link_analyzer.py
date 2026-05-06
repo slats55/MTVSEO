@@ -2,7 +2,7 @@
 """Analyze internal and external links for crawlability and anchor text quality."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 INTERNAL_LINKS_MIN = 2   # pages should have at least some internal links

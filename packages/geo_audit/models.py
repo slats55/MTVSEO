@@ -29,6 +29,7 @@ class GeoIssueCategory(str, enum.Enum):
     ENTITY_OPTIMIZATION = "ENTITY_OPTIMIZATION"
     AI_ANSWER_READINESS = "AI_ANSWER_READINESS"
     LLM_OUTPUT_OPTIMIZATION = "LLM_OUTPUT_OPTIMIZATION"
+    SCHEMA = "SCHEMA"
 
 
 # ─── Score types ──────────────────────────────────────────────────────────────

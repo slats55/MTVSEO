@@ -4,7 +4,7 @@
 from urllib.parse import urlparse
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 PRIMARY_SCHEMA_TYPES = {
     "Organization", "LocalBusiness", "WebSite", "BreadcrumbList",

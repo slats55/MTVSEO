@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import re
 import slugify as slug_lib
 
-from ..models import (
+from .models import (
     BusinessContext,
     ContentBrief,
     ContentFormat,

@@ -1,11 +1,10 @@
 # Business model.
 
-from sqlalchemy import Boolean, String, Text
+import uuid
+from sqlalchemy import Boolean, String, Text, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "businesses"
@@ -30,5 +29,3 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     metric_snapshots = relationship("MetricSnapshot", back_populates="business", cascade="all, delete-orphan")
     reports = relationship("Report", back_populates="business", cascade="all, delete-orphan")
 
-
-import uuid

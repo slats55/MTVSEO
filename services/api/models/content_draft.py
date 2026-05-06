@@ -1,12 +1,12 @@
 # ContentDraft model.
 
-from sqlalchemy import Float, ForeignKey, String, Text
+import uuid
+from datetime import datetime
+from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, JSON, String, Text, UUID
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import DraftStatus
-
 
 class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "content_drafts"
@@ -27,7 +27,7 @@ class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     compliance_notes: Mapped[dict | None] = mapped_column(JSON, default=dict)
     usefulness_score: Mapped[float | None] = mapped_column(Float)
     status: Mapped[DraftStatus] = mapped_column(
-        DraftStatus, default=DraftStatus.DRAFT, nullable=False
+        Enum(DraftStatus), default=DraftStatus.DRAFT, nullable=False
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     approved_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
@@ -37,6 +37,3 @@ class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     brief = relationship("ContentBrief", back_populates="drafts")
     publishing_jobs = relationship("PublishingJob", back_populates="draft")
 
-
-import uuid
-from datetime import datetime

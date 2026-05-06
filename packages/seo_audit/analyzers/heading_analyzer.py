@@ -2,7 +2,7 @@
 """Analyze heading structure (H1, H2, H3 hierarchy) for SEO quality."""
 
 from ...crawler.models import PageRecord
-from ...models import AuditIssue, IssueCategory, IssueSeverity
+from ..models import AuditIssue, IssueCategory, IssueSeverity
 
 
 def analyze(page: PageRecord, h1_count: int, h2_counts: dict[str, int]) -> list[AuditIssue]:

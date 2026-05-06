@@ -1,11 +1,10 @@
 # Page model.
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
+import uuid
+from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text, UUID
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
-
 
 class Page(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "pages"
@@ -42,5 +41,3 @@ class Page(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     seo_issues = relationship("SeoIssue", back_populates="page", cascade="all, delete-orphan")
     geo_issues = relationship("GeoIssue", back_populates="page", cascade="all, delete-orphan")
 
-
-import uuid

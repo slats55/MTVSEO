@@ -7,7 +7,7 @@ No external API calls.
 import re
 from typing import Any
 
-from ..models import (
+from .models import (
     SchemaContext,
     SchemaType,
     ValidationError,
