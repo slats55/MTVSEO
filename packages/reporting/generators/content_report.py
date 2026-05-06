@@ -5,8 +5,8 @@ No DB dependency, no audit — pure content analysis.
 """
 
 from datetime import datetime, timezone
-from packages.crawler.models import PageRecord, CrawlResult
-from packages.reporting.models import (
+from ...crawler.models import PageRecord, CrawlResult
+from ...models import (
     ReportData,
     ReportMetadata,
     ReportType,

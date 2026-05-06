@@ -1,6 +1,6 @@
 """Markdown formatter for audit reports."""
 
-from packages.reporting.models import (
+from ...models import (
     ReportData,
     ReportMetadata,
     ScoreCard,

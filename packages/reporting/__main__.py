@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-from packages.reporting import (
+from . import (
     MarkdownFormatter,
     AuditReportGenerator,
     CrawlSummaryGenerator,
@@ -38,8 +38,8 @@ def run_audit(input_path: str, output_path: str | None) -> None:
     audit_report_data = data.get("seo_audit", {})
 
     # Deserialize into Pydantic models
-    from packages.crawler.models import CrawlResult
-    from packages.seo_audit.models import AuditReport
+    from ..crawler.models import CrawlResult
+    from ..seo_audit.models import AuditReport
 
     crawl_result = CrawlResult.model_validate(crawl_result_data)
     audit_report = AuditReport.model_validate(audit_report_data) if audit_report_data else None
@@ -66,7 +66,7 @@ def run_audit(input_path: str, output_path: str | None) -> None:
 
 def run_crawl(input_path: str, output_path: str | None) -> None:
     data = load_json(input_path)
-    from packages.crawler.models import CrawlResult
+    from ..crawler.models import CrawlResult
     crawl_result = CrawlResult.model_validate(data.get("crawl_result", data))
     website_url = data.get("website_url", crawl_result.start_url)
 
@@ -85,7 +85,7 @@ def run_crawl(input_path: str, output_path: str | None) -> None:
 
 def run_content(input_path: str, output_path: str | None) -> None:
     data = load_json(input_path)
-    from packages.crawler.models import PageRecord
+    from ..crawler.models import PageRecord
     pages_data = data.get("pages", data) if isinstance(data, dict) else data
     pages = [PageRecord.model_validate(p) for p in pages_data]
     website_url = data.get("website_url", "https://unknown")

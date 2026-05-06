@@ -4,7 +4,7 @@ Converts audit results, crawl summaries, and content analysis into
 human-readable reports (Markdown first, HTML/PDF later).
 
 Public API:
-    from packages.reporting import (
+    from .reporting import (
         MarkdownFormatter,
         AuditReportGenerator,
         CrawlSummaryGenerator,
@@ -28,7 +28,7 @@ Usage:
     print(markdown)
 """  
 
-from packages.reporting.models import (
+from .models import (
     ReportFormat,
     ReportType,
     ScoreCard,
@@ -37,8 +37,8 @@ from packages.reporting.models import (
     ReportMetadata,
     ReportData,
 )
-from packages.reporting.formatters import MarkdownFormatter
-from packages.reporting.generators import (
+from .formatters import MarkdownFormatter
+from .generators import (
     AuditReportGenerator,
     CrawlSummaryGenerator,
     ContentReportGenerator,

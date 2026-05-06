@@ -7,11 +7,11 @@ from datetime import datetime, timezone
 from typing import Sequence
 from urllib.parse import urlparse
 
-from packages.crawler.models import CrawlConfig, CrawlResult, CrawlSummary, PageRecord
-from packages.crawler.page_fetcher import PageFetcher
-from packages.crawler.robots_parser import RobotParser
-from packages.crawler.sitemap_parser import SitemapParser
-from packages.shared.logging import get_logger
+from ..models import CrawlConfig, CrawlResult, CrawlSummary, PageRecord
+from ..page_fetcher import PageFetcher
+from ..robots_parser import RobotParser
+from ..sitemap_parser import SitemapParser
+from ..shared.logging import get_logger
 
 logger = get_logger(__name__)
 

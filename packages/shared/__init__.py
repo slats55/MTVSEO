@@ -1,11 +1,11 @@
 # packages/shared — Cross-cutting types, config, exceptions, and logging.
 #
 # Import conveniences:
-#   from packages.shared import get_logger, SeoAgentException, CrawlerException
-#   from packages.shared.config import API_V1_PREFIX, DATABASE_URL, REDIS_URL
-#   from packages.shared.types import SeoScoreBreakdown, GeoScoreBreakdown
+#   from . import get_logger, SeoAgentException, CrawlerException
+#   from .config import API_V1_PREFIX, DATABASE_URL, REDIS_URL
+#   from .types import SeoScoreBreakdown, GeoScoreBreakdown
 
-from packages.shared.config import (
+from .config import (
     AI_MODEL_CONTENT,
     AI_MODEL_EDITOR,
     AI_MODEL_EXTRACTION,
@@ -51,7 +51,7 @@ from packages.shared.config import (
     STORAGE_PATH,
     SYNC_DATABASE_URL,
 )
-from packages.shared.exceptions import (
+from .exceptions import (
     ApprovalRequiredError,
     AuditException,
     AuditTimeoutError,
@@ -74,13 +74,13 @@ from packages.shared.exceptions import (
     ValidationException,
     ComplianceViolationError,
 )
-from packages.shared.logging import (
+from .shared_logger import (
     configure_root_logger,
     get_logger,
     log_audit_event,
     log_crawl_event,
 )
-from packages.shared.types import (
+from .types import (
     AuditResultDict,
     ComplianceFlagDict,
     ContentOpportunityScore,

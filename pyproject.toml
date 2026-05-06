@@ -1,0 +1,18 @@
+[project]
+name = "seo-agent-os"
+version = "0.1.0"
+description = "Autonomous SEO and GEO agent system"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# Namespace package marker — enables 'from packages' style imports
+# when the repo root is on PYTHONPATH.
+[tool.setuptools]
+packages = ["packages"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

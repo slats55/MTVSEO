@@ -8,7 +8,7 @@ from xml.etree import ElementTree as ET
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from packages.shared.logging import get_logger
+from ..shared.logging import get_logger
 
 logger = get_logger(__name__)
 

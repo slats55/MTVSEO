@@ -5,7 +5,7 @@ Usage (standalone):
     python -m packages.crawler.crawl_worker https://example.com
 
 Usage (Celery — when Celery is configured):
-    from packages.crawler.crawl_worker import crawl_website_task
+    from ..crawl_worker import crawl_website_task
     crawl_website_task.delay(crawl_run_id="...", start_url="https://example.com", ...)
 
 The worker:
@@ -25,15 +25,15 @@ from uuid import UUID
 # Add project root to path for standalone invocation
 sys.path.insert(0, str(__file__).rsplit("/packages/", 1)[0])
 
-from packages.crawler.crawl_runner import CrawlRunner
-from packages.crawler.models import CrawlConfig, CrawlSummary
-from packages.shared.config import (
+from ..crawl_runner import CrawlRunner
+from ..models import CrawlConfig, CrawlSummary
+from ..shared.config import (
     DEFAULT_CRAWL_DEPTH,
     DEFAULT_CRAWL_DELAY_MS,
     DEFAULT_MAX_PAGES,
     DEFAULT_USER_AGENT,
 )
-from packages.shared.logging import get_logger
+from ..shared.logging import get_logger
 
 logger = get_logger(__name__)
 

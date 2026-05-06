@@ -5,9 +5,9 @@ intermediate representation suitable for any output formatter.
 """
 
 from datetime import datetime, timezone
-from packages.seo_audit.models import AuditReport, AuditIssue, AuditScore
-from packages.seo_audit.scorer import compute_score
-from packages.reporting.models import (
+from ...seo_audit.models import AuditReport, AuditIssue, AuditScore
+from ...seo_audit.scorer import compute_score
+from ...models import (
     ReportData,
     ReportMetadata,
     ReportType,

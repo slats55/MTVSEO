@@ -5,8 +5,8 @@ a ReportData intermediate representation.
 """
 
 from datetime import datetime, timezone
-from packages.crawler.models import CrawlResult, CrawlSummary, PageRecord
-from packages.reporting.models import (
+from ...crawler.models import CrawlResult, CrawlSummary, PageRecord
+from ...models import (
     ReportData,
     ReportMetadata,
     ReportType,

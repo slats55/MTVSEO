@@ -32,7 +32,7 @@ DATABASE_URL = os.environ.get(
 )
 SYNC_DATABASE_URL = os.environ.get(
     "SYNC_DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/seo_agent_os"
+    "postgresql://postgres:***@localhost:5432/seo_agent_os"
 )
 
 # Connection pool settings

@@ -11,21 +11,21 @@
 #   SitemapParser — sitemap.xml discovery and parsing
 #
 # Usage:
-#   from packages.crawler import CrawlConfig, CrawlRunner
+#   from .crawler import CrawlConfig, CrawlRunner
 #   config = CrawlConfig(start_url="https://example.com", max_pages=50)
 #   runner = CrawlRunner(config)
 #   result = await runner.run()
 
-from packages.crawler.models import (
+from .models import (
     CrawlConfig,
     CrawlResult,
     CrawlSummary,
     PageRecord,
 )
-from packages.crawler.crawl_runner import CrawlRunner
-from packages.crawler.page_fetcher import PageFetcher
-from packages.crawler.robots_parser import RobotParser
-from packages.crawler.sitemap_parser import SitemapParser
+from .crawl_runner import CrawlRunner
+from .page_fetcher import PageFetcher
+from .robots_parser import RobotParser
+from .sitemap_parser import SitemapParser
 
 __all__ = [
     "CrawlConfig",
