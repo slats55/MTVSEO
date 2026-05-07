@@ -509,7 +509,7 @@ All 10 MVP tickets are complete. Remaining work:
 **Branch:** `chore/stabilize-runtime` (created from `master`)
 **Previous commit on master:** `ce97499` — "docs: Update AGENT_HANDOFF.md — All 10 MVP tickets complete"
 **Commit 1 on this branch:** `8a599b0` — "fix: normalize package imports, rename logging.py to avoid stdlib shadow"
-**New commit:** (pending) — "fix: complete backend runtime stabilization"
+**New commit:** `d18c878` — "docs: add NEXT_PHASE_PLAN.md — Phase 2 priorities and merge strategy"
 
 ### What Was Fixed
 
@@ -603,7 +603,7 @@ pytest: 4 passed, 6 warnings
 - **PydanticDeprecatedSince20**: `Settings` class uses class-based `config = ...` which is deprecated in Pydantic V3. Fix: convert to `model_config = ConfigDict(...)`.
 - **geo_audit UserWarning**: Field name "schema" in `GeoScore` shadows an attribute in parent `BaseModel`. Cosmetic — can rename field to `schema_data` or `schema_org` to fix.
 
-### Files Changed (Uncommitted)
+### Files Changed (all committed in `6190db9` + `d18c878`)
 - `requirements.txt` — added tenacity, email-validator, dnspython, python-slugify, dataclass-wizard
 - `packages/schema_engine/models.py` — removed unused dataclass_wizard import
 - `packages/schema_engine/generators/__init__.py` — fixed dot counts
@@ -613,6 +613,7 @@ pytest: 4 passed, 6 warnings
 - `services/api/config.py` — restored `settings = get_settings()` singleton
 - `scripts/verify_local.py` — fixed GeoScoreBreakdown → GeoScore, DATABASE_URL → database_url
 - `tests/test_backend_smoke.py` — fixed title assertion, GeoScoreBreakdown → GeoScore, DATABASE_URL → database_url
+- `NEXT_PHASE_PLAN.md` — Phase 2 priorities and merge strategy
 
 ### For Codex Agent
 **Branch from `chore/stabilize-runtime`** — it is the clean, importable, testable handoff branch.
