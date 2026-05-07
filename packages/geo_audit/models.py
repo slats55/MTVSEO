@@ -52,7 +52,7 @@ class GeoScore(BaseModel):
     entity_clarity: float = Field(ge=0, le=15)
     citability: float = Field(ge=0, le=25)
     content_depth: float = Field(ge=0, le=20)
-    schema: float = Field(ge=0, le=10)
+    schema_score: float = Field(ge=0, le=10)
     brand_authority: float = Field(ge=0, le=10)
     llm_readability: float = Field(ge=0, le=5)
 
@@ -63,7 +63,7 @@ class GeoScore(BaseModel):
             + self.entity_clarity
             + self.citability
             + self.content_depth
-            + self.schema
+            + self.schema_score
             + self.brand_authority
             + self.llm_readability
         )

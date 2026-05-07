@@ -46,7 +46,7 @@ def main() -> None:
     print(f"  Entity Clarity:        {report.score.entity_clarity:.1f}/15")
     print(f"  Citability:            {report.score.citability:.1f}/25")
     print(f"  Content Depth:         {report.score.content_depth:.1f}/20")
-    print(f"  Schema:                {report.score.schema:.1f}/10")
+    print(f"  Schema:                {report.score.schema_score:.1f}/10")
     print(f"  Brand Authority:       {report.score.brand_authority:.1f}/10")
     print(f"  LLM Readability:       {report.score.llm_readability:.1f}/5")
     print(f"\n=== Issues by Severity ===")
