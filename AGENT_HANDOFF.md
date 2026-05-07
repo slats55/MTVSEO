@@ -498,9 +498,46 @@ All 10 MVP tickets are complete. Remaining work:
 
 ## Notes
 
-- WSL path mapping: `/mnt/c/Users/mtval/Projects/seo-agent-os`
-- Worktree rule: never commit to main, never merge into main, never push to GitHub unless explicitly told
-- This project has no remote configured yet
+## Frontend Build Verification — 2026-05-07
+
+**Blocked path (FAIL):** `/mnt/c/Users/mtval/Projects/seo-agent-os/` (WSL npm + Windows-mounted filesystem)
+
+**Root cause:** npm rename() syscall on /mnt/c filesystem returns EACCES when WSL npm tries to atomically replace package directories during install. Not a code issue.
+
+**Verification path (PASS):** Native WSL filesystem — `~/Projects/seo-agent-os-wsl/`
+- Branch: `feature/backend-phase2` (cloned fresh from origin)
+- node_modules deleted before install (clean slate)
+- package-lock.json created by npm 10 — untracked, not committed
+
+**npm install:** PASSED (392 packages, 5 vulnerabilities — not code bugs, just deprecated deps)
+
+**npm run build:** PASSED — one real code fix required:
+
+**Code fix:** `apps/web/src/app/page.tsx` line 101 — `FileText` icon used but not imported from `lucide-react`. Added to import block.
+
+**Build output:**
+```
+Route (app)                    Size     First Load JS
+┌ ○ /                          3.19 kB        90.3 kB
+├ ○ /_not-found                873 B            88 kB
+├ ○ /audits                    2.7 kB         89.8 kB
+├ ○ /businesses                2.06 kB        89.2 kB
+└ ○ /reports                   2.08 kB        89.2 kB
+```
+
+**Real change to commit:**
+- `apps/web/src/app/page.tsx` — add `FileText` to lucide-react imports
+
+**Do NOT commit:** `apps/web/.next/`, `apps/web/next-env.d.ts`, `apps/web/package-lock.json`, `apps/web/node_modules/`
+
+## Stabilization Order (In Progress)
+
+1. [DONE] Frontend build verification
+2. [ ] Expanded smoke tests
+3. [ ] SQLite fallback verification
+4. [ ] Alembic migration verification
+5. [ ] Cosmetic Pydantic/model warnings
+6. [ ] run_dev.sh only after verification passes
 
 ---
 
