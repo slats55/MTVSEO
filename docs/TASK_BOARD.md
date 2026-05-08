@@ -26,28 +26,18 @@
 - [x] Package renames fixed (hyphen → underscore) for Python import compatibility
 
 ## In Progress
-- [ ] Backend runtime verification under Python 3.11+ (BLOCKED by environment)
-- [ ] Frontend build verification (pending backend fix)
-- [ ] Alembic migration verification (pending Python 3.11+)
-- [ ] SQLite fallback test run (pending Python 3.11+)
-- [ ] Documentation gap fill (9 missing docs)
+- [ ] Documentation gap fill (9 missing docs) — high priority for handoff completeness
+- [ ] Expand smoke tests to cover at least one router endpoint and DB session (optional)
 
 ## Blocked
-- [ ] Python runtime — system Python 3.9.6 cannot import codebase; requires Python 3.11+
-- [ ] Any `pytest` or `verify_local.py` execution until Python 3.11+ is available
-- [ ] Frontend build not attempted (backend must import first for API integration planning)
+*(none)*
 
 ## Next Up (ranked)
-1. **Install Python 3.11+** and recreate virtualenv. This is the critical path.
-2. Run `scripts/verify_local.py` and fix any import/runtime issues (likely none if Python version correct).
-3. Run `pytest tests/ -q` and achieve green suite.
-4. Test `alembic upgrade head` (from `services/api`) with SQLite fallback.
-5. Run `tests/test_sqlite_fallback.py` to confirm local-dev DB path works without Postgres.
-6. Build frontend: `cd apps/web && npm install && npm run build`. Fix TypeScript errors if any.
-7. Update `.flash-task.txt` to current Step Flash task (it still says "create skeleton").
-8. Create missing documentation (see Priority Docs below).
-9. Expand smoke tests to cover at least one router endpoint and DB session.
-10. Update `AGENT_HANDOFF.md` with Step Flash audit results before ending.
+1. **Documentation completion** — Create the 9 missing docs (see Priority Documentation below). Start with API_SPEC.md, AGENT_ROLES.md, ROADMAP.md, DECISIONS.md.
+2. **Update AGENT_HANDOFF.md** — Append the Step Flash verification pass section.
+3. **Optional test expansion** — Add a simple router endpoint test if time permits; current 15 tests cover core imports and SQLite fallback.
+4. **Prepare for MiniMax** — Ensure `packages/integrations/` skeleton exists and document GSC/GA4/PageSpeed API plans.
+5. **Do NOT merge branches** — `feature/backend-phase2` is stable but should not merge until integrations are at least partially implemented and documented.
 
 ### Priority Documentation (missing)
 - `docs/API_SPEC.md` — document all FastAPI endpoints with request/response examples
@@ -56,7 +46,7 @@
 - `docs/DECISIONS.md` — architectural decision log (should reference ARCHITECTURE.md choices)
 - `docs/CONTENT_WORKFLOW.md` — content brief → draft → review → publish flow
 - `docs/PUBLISHING_SAFETY.md` — approval mode, rollback procedures, human-in-the-loop enforcement
-- `docs/COMPLIANCE_GUARDRAILS.md` — detailed YMYL/cannabis rules, fake content禁止
+- `docs/COMPLIANCE_GUARDRAILS.md` — detailed YMYL/cannabis rules, fake content prohibition
 - `docs/SEO_AUDIT_SCORING.md` — technical SEO score model formula and thresholds
 - `docs/GEO_AUDIT_SCORING.md` — GEO score model formula and thresholds
 
