@@ -1,8 +1,8 @@
 # PageSnapshot model — one-to-one with Page.
 
 import uuid
-from sqlalchemy import ForeignKey, JSON, LargeBinary, String, Text, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import ForeignKey, JSON, LargeBinary, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
@@ -10,7 +10,7 @@ class PageSnapshot(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "page_snapshots"
 
     page_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("pages.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,

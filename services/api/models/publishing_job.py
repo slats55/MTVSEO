@@ -2,8 +2,8 @@
 
 import uuid
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, Uuid
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import PublishDestination, PublishStatus
@@ -12,7 +12,7 @@ class PublishingJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "publishing_jobs"
 
     content_draft_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("content_drafts.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -24,8 +24,8 @@ class PublishingJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     status: Mapped[PublishStatus] = mapped_column(
         Enum(PublishStatus), default=PublishStatus.PENDING_REVIEW, nullable=False
     )
-    submitted_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    approved_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     error_message: Mapped[str | None] = mapped_column(Text)
     published_url: Mapped[str | None] = mapped_column(String(2000))
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -109,6 +109,11 @@ def create_app() -> FastAPI:
     app.include_router(crawls.router, prefix=api_prefix, tags=["crawls"])
     app.include_router(pages.router, prefix=api_prefix, tags=["pages"])
 
+    # Disable trailing-slash redirects globally — tests use specific paths
+    # and FastAPI's default redirect_slashes=True issues 307s that convert
+    # POST to GET when a route both with and without trailing slash exists.
+    app.router.redirect_slashes = False
+
     return app
 
 

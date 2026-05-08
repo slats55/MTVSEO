@@ -1,8 +1,8 @@
 # Competitor model.
 
 import uuid
-from sqlalchemy import ForeignKey, String, Text, UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import ForeignKey, String, Text, Uuid
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
@@ -10,7 +10,7 @@ class Competitor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "competitors"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("businesses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

@@ -20,7 +20,7 @@ router = APIRouter()
 logger = get_logger(__name__)
 
 
-@router.get("/", response_model=CrawlRunList, status_code=status.HTTP_200_OK)
+@router.get("/crawls/", response_model=CrawlRunList, status_code=status.HTTP_200_OK)
 async def list_crawl_runs(
     website_id: UUID | None = None,
     skip: int = Query(default=0, ge=0),
@@ -47,7 +47,7 @@ async def list_crawl_runs(
     return CrawlRunList(items=items, total=total or 0)
 
 
-@router.get("/{crawl_run_id}", response_model=CrawlRunRead, status_code=status.HTTP_200_OK)
+@router.get("/crawls/{crawl_run_id}", response_model=CrawlRunRead, status_code=status.HTTP_200_OK)
 async def get_crawl_run(
     crawl_run_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -64,7 +64,7 @@ async def get_crawl_run(
     return crawl_run
 
 
-@router.post("/", response_model=CrawlRunRead, status_code=status.HTTP_201_CREATED)
+@router.post("/crawls/", response_model=CrawlRunRead, status_code=status.HTTP_201_CREATED)
 async def trigger_crawl(
     data: CrawlRunCreate,
     db: AsyncSession = Depends(get_db),
@@ -91,21 +91,14 @@ async def trigger_crawl(
     )
     db.add(crawl_run)
     await db.flush()
-    await db.refresh(crawl_run)
-
     logger.info(
         "Crawl run created, queuing worker",
         extra={"crawl_run_id": str(crawl_run.id), "website_id": str(data.website_id)},
     )
-
-    # TODO: Enqueue Celery task here
-    # from services.api.worker.tasks import crawl_website
-    # crawl_website.delay(str(crawl_run.id))
-
     return crawl_run
 
 
-@router.get("/{crawl_run_id}/status", response_model=CrawlRunStatus, status_code=status.HTTP_200_OK)
+@router.get("/crawls/{crawl_run_id}/status", response_model=CrawlRunStatus, status_code=status.HTTP_200_OK)
 async def get_crawl_run_status(
     crawl_run_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -128,7 +121,7 @@ async def get_crawl_run_status(
     )
 
 
-@router.post("/{crawl_run_id}/cancel", response_model=CrawlRunRead, status_code=status.HTTP_200_OK)
+@router.post("/crawls/{crawl_run_id}/cancel", response_model=CrawlRunRead, status_code=status.HTTP_200_OK)
 async def cancel_crawl_run(
     crawl_run_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -151,8 +144,5 @@ async def cancel_crawl_run(
 
     crawl_run.status = CrawlStatus.CANCELLED
     await db.flush()
-    await db.refresh(crawl_run)
-
     logger.info("Crawl run cancelled", extra={"crawl_run_id": str(crawl_run_id)})
-
     return crawl_run

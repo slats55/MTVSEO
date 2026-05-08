@@ -1,8 +1,8 @@
 # SchemaDraft model.
 
 import uuid
-from sqlalchemy import Boolean, Enum, ForeignKey, JSON, String, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Boolean, Enum, ForeignKey, JSON, String, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import SchemaStatus
@@ -11,7 +11,7 @@ class SchemaDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "schema_drafts"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("websites.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

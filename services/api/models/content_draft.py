@@ -2,8 +2,8 @@
 
 import uuid
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, JSON, String, Text, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, JSON, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import DraftStatus
@@ -12,7 +12,7 @@ class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "content_drafts"
 
     content_brief_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("content_briefs.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -32,8 +32,8 @@ class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     status: Mapped[DraftStatus] = mapped_column(
         Enum(DraftStatus), default=DraftStatus.DRAFT, nullable=False
     )
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    approved_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Relationships
