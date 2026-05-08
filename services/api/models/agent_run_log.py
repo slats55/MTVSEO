@@ -11,7 +11,10 @@ class AgentRunLog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "agent_run_logs"
 
     agent_task_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("agent_tasks.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     step: Mapped[str | None] = mapped_column(String(100))
     log_level: Mapped[LogLevel] = mapped_column(
