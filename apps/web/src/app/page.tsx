@@ -1,8 +1,11 @@
 "use client";
 
+import { MetricCard } from "@/components/metric-card";
+import { StatusBadge } from "@/components/status-badge";
 import {
   Activity,
   AlertTriangle,
+  ArrowUpRight,
   CheckCircle2,
   ExternalLink,
   FileText,
@@ -10,196 +13,250 @@ import {
   RefreshCcw,
   Search,
   TrendingUp,
+  ChevronRight,
+  BarChart3,
+  LineChart,
+  Zap,
 } from "lucide-react";
 
-// Mock data — replace with API calls via React Query
-const mockSeoScore = 72;
-const mockGeoScore = 58;
+// Mock data — replace with API calls via React Query after CRUD stabilizes
+const metrics = [
+  { label: "Technical SEO", value: 72, max: 100, unit: "", icon: Search, grade: "C" as const, trend: { value: 3, label: "+3" } },
+  { label: "GEO / AI Visibility", value: 58, max: 100, unit: "", icon: Activity, grade: "D" as const, trend: { value: 5, label: "+5" } },
+  { label: "Content Quality", value: 81, max: 100, unit: "", icon: FileText, grade: "B" as const, trend: { value: 2, label: "+2" } },
+  { label: "Crawl Health", value: 94, max: 100, unit: "", icon: Globe, grade: "A" as const },
+];
+
+const quickActions = [
+  { label: "New Crawl", icon: RefreshCcw, href: "/businesses", description: "Crawl a website" },
+  { label: "Run SEO Audit", icon: Search, href: "/audits", description: "Technical analysis" },
+  { label: "Run GEO Audit", icon: Activity, href: "/audits", description: "AI visibility check" },
+  { label: "Generate Report", icon: FileText, href: "/reports", description: "Export findings" },
+];
+
 const recentCrawls = [
   { id: "1", website: "mtvhvac.com", status: "completed", pages: 47, score: 72, date: "2h ago" },
   { id: "2", website: "green-culture.co", status: "completed", pages: 31, score: 61, date: "1d ago" },
   { id: "3", website: "countryroadsauto.com", status: "failed", pages: 12, score: null, date: "2d ago" },
+  { id: "4", website: "example.org", status: "completed", pages: 89, score: 85, date: "3d ago" },
 ];
 
-const quickActions = [
-  { label: "New Crawl", icon: RefreshCcw, href: "/businesses", color: "text-blue-400" },
-  { label: "Run SEO Audit", icon: Search, href: "/audits", color: "text-orange-400" },
-  { label: "Run GEO Audit", icon: Activity, href: "/audits", color: "text-purple-400" },
-  { label: "Generate Report", icon: ExternalLink, href: "/reports", color: "text-green-400" },
+const topIssues = [
+  { severity: "high", count: 3, title: "Missing meta descriptions on 12 pages", category: "On-Page SEO" },
+  { severity: "high", count: 2, title: "Duplicate title tags found", category: "On-Page SEO" },
+  { severity: "medium", count: 7, title: "Images missing alt text", category: "Images & Media" },
+  { severity: "medium", count: 4, title: "Broken internal links (404)", category: "Links" },
+  { severity: "low", count: 11, title: "H1 too long (>60 chars)", category: "Headings" },
 ];
 
-function ScoreCard({
-  label,
-  score,
-  grade,
-  icon: Icon,
-  trend,
-}: {
-  label: string;
-  score: number;
-  grade: string;
-  icon: React.ElementType;
-  trend?: string;
-}) {
-  const colorMap: Record<string, string> = {
-    A: "text-green-400",
-    B: "text-yellow-400",
-    C: "text-orange-400",
-    D: "text-red-400",
-    F: "text-red-600",
-  };
-  const barColor: Record<string, string> = {
-    A: "bg-green-500",
-    B: "bg-yellow-500",
-    C: "bg-orange-500",
-    D: "bg-red-500",
-    F: "bg-red-700",
-  };
+const keywordOpportunities = [
+  { keyword: "emergency hvac repair", volume: 2200, difficulty: 45, position: 12, change: "+3" },
+  { keyword: "commercial hvac maintenance", volume: 1800, difficulty: 52, position: 24, change: "+1" },
+  { keyword: "geothermal heating", volume: 950, difficulty: 38, position: 8, change: "+5" },
+];
 
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Icon className={`h-5 w-5 ${colorMap[grade]}`} />
-          <span className="text-sm font-medium text-slate-300">{label}</span>
-        </div>
-        {trend && (
-          <span className="flex items-center gap-0.5 text-xs text-green-400">
-            <TrendingUp className="h-3 w-3" /> {trend}
-          </span>
-        )}
-      </div>
-      <div className="flex items-end gap-3">
-        <span className={`text-4xl font-bold ${colorMap[grade]}`}>{score}</span>
-        <span className="text-lg font-semibold text-slate-500">/100</span>
-        <span className={`ml-1 text-2xl font-bold ${colorMap[grade]}`}>{grade}</span>
-      </div>
-      <div className="mt-3 h-1.5 w-full rounded-full bg-slate-800">
-        <div
-          className={`h-1.5 rounded-full transition-all ${barColor[grade]}`}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-    </div>
-  );
+function getStatusVariant(status: string) {
+  switch (status) {
+    case "completed":
+      return "success" as const;
+    case "failed":
+      return "error" as const;
+    default:
+      return "neutral" as const;
+  }
 }
 
 export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Overview for <span className="text-blue-400">MTV Tech Solutions</span>
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Overview for <span className="text-blue-400 font-medium">MTV Tech Solutions</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+          <span className="text-xs text-slate-500">Last sync: 5 min ago</span>
+        </div>
       </div>
 
-      {/* Score cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <ScoreCard label="Technical SEO" score={mockSeoScore} grade="C" icon={Search} trend="+3" />
-        <ScoreCard label="GEO / AI Visibility" score={mockGeoScore} grade="D" icon={Activity} trend="+5" />
-        <ScoreCard label="Content Quality" score={81} grade="B" icon={FileText} trend="+2" />
-        <ScoreCard label="Crawl Health" score={94} grade="A" icon={Globe} />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((m) => (
+          <MetricCard
+            key={m.label}
+            label={m.label}
+            value={m.value}
+            max={m.max}
+            unit={m.unit}
+            icon={m.icon}
+            grade={m.grade}
+            trend={m.trend}
+          />
+        ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {quickActions.map((action) => (
           <a
             key={action.label}
             href={action.href}
-            className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 hover:border-slate-700 hover:bg-slate-800/50 transition-all"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-slate-700 hover:bg-slate-800/60 transition-all"
           >
-            <action.icon className={`h-5 w-5 ${action.color}`} />
+            <div className="flex items-center justify-between w-full">
+              <action.icon className="h-5 w-5 text-blue-400 group-hover:text-blue-300" />
+              <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-slate-400" />
+            </div>
             <span className="text-sm font-medium text-slate-200">{action.label}</span>
+            <span className="text-xs text-slate-500">{action.description}</span>
           </a>
         ))}
       </div>
 
-      {/* Recent crawls */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-          <h2 className="text-base font-semibold text-white">Recent Crawls</h2>
-          <a href="/businesses" className="text-xs text-blue-400 hover:underline">
-            View all
-          </a>
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Crawls */}
+        <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold text-white">Recent Crawls</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Latest website scans</p>
+            </div>
+            <a href="/businesses" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+              View all <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-800 text-left text-slate-500">
+                  <th className="px-5 py-3 font-medium">Website</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium">Pages</th>
+                  <th className="px-5 py-3 font-medium">Score</th>
+                  <th className="px-5 py-3 font-medium">When</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {recentCrawls.map((crawl) => (
+                  <tr key={crawl.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="px-5 py-3 text-slate-200 font-mono text-xs">{crawl.website}</td>
+                    <td className="px-5 py-3">
+                      <StatusBadge status={getStatusVariant(crawl.status)} label={crawl.status} />
+                    </td>
+                    <td className="px-5 py-3 text-slate-300">{crawl.pages}</td>
+                    <td className="px-5 py-3">
+                      {crawl.score ? (
+                        <span className={`font-semibold ${
+                          crawl.score >= 80 ? "text-green-400" :
+                          crawl.score >= 60 ? "text-yellow-400" : "text-red-400"
+                        }`}>
+                          {crawl.score}
+                        </span>
+                      ) : (
+                        <span className="text-slate-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-slate-500">{crawl.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-800 text-left text-slate-500">
-              <th className="px-5 py-3 font-medium">Website</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium">Pages</th>
-              <th className="px-5 py-3 font-medium">SEO Score</th>
-              <th className="px-5 py-3 font-medium">When</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800">
-            {recentCrawls.map((crawl) => (
-              <tr key={crawl.id} className="hover:bg-slate-800/40 transition-colors">
-                <td className="px-5 py-3 text-slate-200 font-mono text-xs">{crawl.website}</td>
-                <td className="px-5 py-3">
-                  {crawl.status === "completed" ? (
-                    <span className="inline-flex items-center gap-1 text-green-400">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Completed
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-red-400">
-                      <AlertTriangle className="h-3.5 w-3.5" /> Failed
-                    </span>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-slate-300">{crawl.pages}</td>
-                <td className="px-5 py-3">
-                  {crawl.score ? (
-                    <span className={`font-semibold ${
-                      crawl.score >= 80 ? "text-green-400" :
-                      crawl.score >= 60 ? "text-yellow-400" : "text-red-400"
-                    }`}>
-                      {crawl.score}
-                    </span>
-                  ) : (
-                    <span className="text-slate-600">—</span>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-slate-500">{crawl.date}</td>
-              </tr>
+
+        {/* Top Issues */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold text-white">Top Issues</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Priority items to fix</p>
+            </div>
+            <a href="/audits" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+              View all <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+          <div className="divide-y divide-slate-800">
+            {topIssues.map((issue, i) => (
+              <div key={i} className="flex items-start gap-3 px-5 py-3 hover:bg-slate-800/30 transition-colors">
+                <div className="mt-0.5">
+                  {issue.severity === "high" && <AlertTriangle className="h-4 w-4 text-red-400" />}
+                  {issue.severity === "medium" && <AlertTriangle className="h-4 w-4 text-yellow-400" />}
+                  {issue.severity === "low" && <BarChart3 className="h-4 w-4 text-blue-400" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-slate-200 leading-relaxed">{issue.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-slate-500">{issue.category}</span>
+                    <span className="text-xs text-slate-600">•</span>
+                    <span className="text-xs text-slate-500">{issue.count} occurrences</span>
+                  </div>
+                </div>
+                <StatusBadge status={issue.severity === "high" ? "error" : issue.severity === "medium" ? "warning" : "info"} />
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
-      {/* Top issues summary */}
+      {/* Keyword Opportunities */}
       <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-          <h2 className="text-base font-semibold text-white">Top Issues</h2>
-          <a href="/audits" className="text-xs text-blue-400 hover:underline">
-            View all issues
+          <div>
+            <h2 className="text-base font-semibold text-white">Keyword Opportunities</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Quick wins from recent analysis</p>
+          </div>
+          <a href="/audits" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+            View keywords <ArrowUpRight className="h-3 w-3" />
           </a>
         </div>
-        <div className="divide-y divide-slate-800">
-          {[
-            { severity: "high", count: 3, title: "Missing meta descriptions on 12 pages", cat: "On-Page SEO" },
-            { severity: "high", count: 2, title: "Duplicate title tags found", cat: "On-Page SEO" },
-            { severity: "medium", count: 7, title: "Images missing alt text", cat: "Images & Media" },
-            { severity: "medium", count: 4, title: "Broken internal links (404)", cat: "Links & Navigation" },
-            { severity: "low", count: 11, title: "H1 too long (>60 chars)", cat: "Headings" },
-          ].map((issue, i) => (
-            <div key={i} className="flex items-center gap-4 px-5 py-3">
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${
-                issue.severity === "high" ? "bg-red-900/50 text-red-400" :
-                issue.severity === "medium" ? "bg-yellow-900/50 text-yellow-400" :
-                "bg-blue-900/50 text-blue-400"
-              }`}>
-                {issue.severity}
-              </span>
-              <span className="flex-1 text-sm text-slate-300">{issue.title}</span>
-              <span className="text-xs text-slate-600 bg-slate-800 px-2 py-0.5 rounded">
-                {issue.count}×{issue.cat}
-              </span>
-            </div>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-800 text-left text-slate-500">
+                <th className="px-5 py-3 font-medium">Keyword</th>
+                <th className="px-5 py-3 font-medium">Vol.</th>
+                <th className="px-5 py-3 font-medium">Difficulty</th>
+                <th className="px-5 py-3 font-medium">Pos.</th>
+                <th className="px-5 py-3 font-medium">Change</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800">
+              {keywordOpportunities.map((kw, i) => (
+                <tr key={i} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="px-5 py-3 text-slate-200 font-medium">{kw.keyword}</td>
+                  <td className="px-5 py-3 text-slate-300">{kw.volume.toLocaleString()}</td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-16 rounded-full bg-slate-800">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            kw.difficulty < 40 ? "bg-green-500" :
+                            kw.difficulty < 60 ? "bg-yellow-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${kw.difficulty}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-slate-400">{kw.difficulty}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3 text-slate-300">{kw.position}</td>
+                  <td className="px-5 py-3">
+                    <span className="text-sm font-semibold text-green-400">{kw.change}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
