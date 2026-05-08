@@ -1,19 +1,17 @@
-New task from Orion. Before continuing, read these files in exact order:
-1. README.md
-2. AGENT_HANDOFF.md
-3. docs/DECISIONS.md (if exists)
-4. docs/TASK_BOARD.md (if exists)
-5. docs/ROADMAP.md
-6. docs/PROJECT_BRIEF.md
-7. docs/AGENT_ROLES.md
+Current Step Flash task:
+- Do NOT recreate skeleton — it already exists.
+- Verify current branch state (feature/backend-phase2 → chore/stepflash-project-audit).
+- Run backend and frontend verification (blocked: Python 3.9 < 3.11 required).
+- Update docs/STEP_FLASH_AUDIT.md with findings.
+- Update docs/TASK_BOARD.md with prioritized next steps.
+- Ensure .env.example exists (it does — comprehensive placeholders).
+- Make only small safe fixes (e.g., docs, import quirks, test gaps) once Python version resolved.
+- Do NOT merge or push without user approval.
+- Mark this file as maintained by Step Flash; update if task changes.
 
-Then create the repository skeleton with these folders:
-apps/web, services/api, packages/crawler, packages/seo-audit, packages/geo-audit, packages/content-engine, packages/schema-engine, packages/reporting, packages/integrations, packages/shared, tests, scripts
-
-Each package needs: __init__.py, README.md, basic module structure.
-
-Then write docs/ARCHITECTURE.md with full technical stack: Next.js frontend, FastAPI backend, SQLAlchemy/Alembic/PostgreSQL, Celery or RQ for queue, storage approach, AI model routing.
-
-After finishing: update AGENT_HANDOFF.md, update docs/DECISIONS.md with stack choices, mark tasks in TASK_BOARD.md if it exists. Commit after folder structure and again after ARCHITECTURE.md.
-
-Work methodically. Do not build features yet.
+Next agent must:
+1. Install Python 3.11+ and recreate venv.
+2. Re-run verify_local.py and pytest.
+3. Build frontend (npm install && npm run build).
+4. Complete missing documentation (API_SPEC, AGENT_ROLES, ROADMAP, DECISIONS, etc.).
+5. Update AGENT_HANDOFF.md with verification results.
