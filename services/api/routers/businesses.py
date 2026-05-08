@@ -19,7 +19,7 @@ from services.api.schemas.business import (
 router = APIRouter()
 
 
-@router.get("/", response_model=BusinessList, status_code=status.HTTP_200_OK)
+@router.get("/businesses/", response_model=BusinessList, status_code=status.HTTP_200_OK)
 async def list_businesses(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
@@ -38,7 +38,7 @@ async def list_businesses(
     return BusinessList(items=items, total=total or 0)
 
 
-@router.get("/{business_id}", response_model=BusinessRead, status_code=status.HTTP_200_OK)
+@router.get("/businesses/{business_id}", response_model=BusinessRead, status_code=status.HTTP_200_OK)
 async def get_business(
     business_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -55,7 +55,7 @@ async def get_business(
     return business
 
 
-@router.post("/", response_model=BusinessRead, status_code=status.HTTP_201_CREATED)
+@router.post("/businesses/", response_model=BusinessRead, status_code=status.HTTP_201_CREATED)
 async def create_business(
     data: BusinessCreate,
     db: AsyncSession = Depends(get_db),
@@ -83,7 +83,7 @@ async def create_business(
     return business
 
 
-@router.patch("/{business_id}", response_model=BusinessRead, status_code=status.HTTP_200_OK)
+@router.patch("/businesses/{business_id}", response_model=BusinessRead, status_code=status.HTTP_200_OK)
 async def update_business(
     business_id: UUID,
     data: BusinessUpdate,
@@ -107,7 +107,7 @@ async def update_business(
     return business
 
 
-@router.delete("/{business_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/businesses/{business_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_business(
     business_id: UUID,
     db: AsyncSession = Depends(get_db),

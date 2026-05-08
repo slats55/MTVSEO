@@ -2,8 +2,8 @@
 
 import uuid
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import CrawlStatus
@@ -12,7 +12,7 @@ class CrawlRun(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "crawl_runs"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("websites.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

@@ -20,7 +20,7 @@ from services.api.schemas.website import (
 router = APIRouter()
 
 
-@router.get("/", response_model=WebsiteList, status_code=status.HTTP_200_OK)
+@router.get("/websites/", response_model=WebsiteList, status_code=status.HTTP_200_OK)
 async def list_websites(
     business_id: UUID | None = None,
     skip: int = Query(default=0, ge=0),
@@ -47,7 +47,7 @@ async def list_websites(
     return WebsiteList(items=items, total=total or 0)
 
 
-@router.get("/{website_id}", response_model=WebsiteRead, status_code=status.HTTP_200_OK)
+@router.get("/websites/{website_id}", response_model=WebsiteRead, status_code=status.HTTP_200_OK)
 async def get_website(
     website_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -64,7 +64,7 @@ async def get_website(
     return website
 
 
-@router.post("/", response_model=WebsiteRead, status_code=status.HTTP_201_CREATED)
+@router.post("/websites/", response_model=WebsiteRead, status_code=status.HTTP_201_CREATED)
 async def create_website(
     data: WebsiteCreate,
     db: AsyncSession = Depends(get_db),
@@ -90,7 +90,7 @@ async def create_website(
     return website
 
 
-@router.patch("/{website_id}", response_model=WebsiteRead, status_code=status.HTTP_200_OK)
+@router.patch("/websites/{website_id}", response_model=WebsiteRead, status_code=status.HTTP_200_OK)
 async def update_website(
     website_id: UUID,
     data: WebsiteUpdate,
@@ -114,7 +114,7 @@ async def update_website(
     return website
 
 
-@router.delete("/{website_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/websites/{website_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_website(
     website_id: UUID,
     db: AsyncSession = Depends(get_db),

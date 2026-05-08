@@ -1,8 +1,8 @@
 # Keyword model.
 
 import uuid
-from sqlalchemy import Enum, Float, ForeignKey, Integer, String, UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Enum, Float, ForeignKey, Integer, String, Uuid
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import KeywordIntent
@@ -11,7 +11,7 @@ class Keyword(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "keywords"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("websites.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

@@ -7,9 +7,10 @@
 # - FastAPI dependency_overrides[get_db] = test async sessionmaker
 # - httpx.AsyncClient + ASGITransport calls real async router handlers
 #
-# Routing: POST /api/v1/ (trailing slash) — with app.router.redirect_slashes=False
-# to prevent Starlette from redirecting to /api/v1/businesses (no trailing slash)
-# which has no POST route (405 Method Not Allowed).
+# Routing: Each resource has a distinct path prefix:
+#   /api/v1/businesses/   — businesses
+#   /api/v1/websites/     — websites
+#   /api/v1/crawls/       — crawl runs
 #
 # No Postgres, Redis, Celery, or external APIs required.
 
@@ -18,6 +19,7 @@ import uuid
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from sqlalchemy.pool import StaticPool
@@ -32,7 +34,7 @@ from services.api.main import create_app
 _PLACEHOLDER_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 
-class TestClientFixture:
+class ClientFixture:
     """
     Bundles the async HTTP client with the test session_maker
     so tests can verify DB state after making API calls.
@@ -48,7 +50,7 @@ class TestClientFixture:
         async with self._session_maker() as session:
             result = await session.execute(
                 text("SELECT id, name, user_id, business_type, location FROM businesses WHERE id=:id"),
-                {"id": str(biz_uuid)}
+                {"id": biz_uuid.hex},
             )
             row = result.fetchone()
             if row is None:
@@ -61,7 +63,7 @@ class TestClientFixture:
         async with self._session_maker() as session:
             result = await session.execute(
                 text("SELECT id, url, business_id FROM websites WHERE id=:id"),
-                {"id": str(site_uuid)}
+                {"id": site_uuid.hex},
             )
             row = result.fetchone()
             if row is None:
@@ -73,7 +75,7 @@ class TestClientFixture:
         async with self._session_maker() as session:
             result = await session.execute(
                 text("SELECT id, website_id, status, crawl_depth FROM crawl_runs WHERE id=:id"),
-                {"id": str(crawl_uuid)}
+                {"id": crawl_uuid.hex},
             )
             row = result.fetchone()
             if row is None:
@@ -88,7 +90,7 @@ async def async_client():
     Per-test async SQLite test database with all tables created,
     a placeholder user seeded, and a wired AsyncClient.
 
-    Yields a TestClientFixture containing (app, AsyncClient).
+    Yields a ClientFixture containing (app, AsyncClient).
     """
     engine = create_async_engine(
         "sqlite+aiosqlite:///file::memory:?cache=shared&uri=true",
@@ -129,9 +131,7 @@ async def async_client():
                 await session.close()
 
     app = create_app()
-    # Without this, POST /api/v1/businesses/ redirects to /api/v1/businesses
-    # which has no POST route (405). With redirect_slashes=False,
-    # POST /api/v1/ matches the businesses router directly.
+    # redirect_slashes=False prevents trailing-slash redirects that would turn POST into GET
     app.router.redirect_slashes = False
     app.dependency_overrides[get_db] = override_get_db
 
@@ -140,21 +140,22 @@ async def async_client():
         base_url="http://test",
         follow_redirects=False,
     ) as ac:
-        yield TestClientFixture(app, ac, session_maker)
+        yield ClientFixture(app, ac, session_maker)
 
     app.dependency_overrides.clear()
     await engine.dispose()
 
 
 # =============================================================================
-# POST /api/v1/ — businesses
+# POST /api/v1/businesses/ — create
+# GET /api/v1/businesses/  — list
+# GET /api/v1/businesses/{id} — read single
 # =============================================================================
 
 @pytest.mark.asyncio
-@pytest.mark.asyncio
-async def test_create_business(async_client: TestClientFixture):
-    """POST /api/v1/ creates a business and returns 201 with the record."""
-    resp = await async_client.ac.post("/api/v1/", json={
+async def test_create_business(async_client: ClientFixture):
+    """POST /api/v1/businesses/ creates a business and returns 201 with the record."""
+    resp = await async_client.ac.post("/api/v1/businesses/", json={
         "name": "Acme Dispensary",
         "business_type": "retail",
         "location": "Denver, CO",
@@ -170,18 +171,18 @@ async def test_create_business(async_client: TestClientFixture):
     assert "id" in data
     biz_uuid = uuid.UUID(data["id"])
 
-# Verify DB record
+    # Verify DB record
     biz = await async_client.verify_business_in_db(biz_uuid)
     assert biz is not None
     assert biz["name"] == "Acme Dispensary"
     assert biz["business_type"] == "retail"
-    assert biz["user_id"] == str(_PLACEHOLDER_USER_ID)
+    assert str(biz["user_id"]).replace("-", "") == str(_PLACEHOLDER_USER_ID).replace("-", "")
 
 
 @pytest.mark.asyncio
-async def test_create_business_minimal(async_client: TestClientFixture):
-    """POST /api/v1/ with only the required field 'name' returns 201."""
-    resp = await async_client.ac.post("/api/v1/", json={"name": "Minimal Biz"})
+async def test_create_business_minimal(async_client: ClientFixture):
+    """POST /api/v1/businesses/ with only the required field 'name' returns 201."""
+    resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Minimal Biz"})
 
     assert resp.status_code == 201
     data = resp.json()
@@ -190,23 +191,19 @@ async def test_create_business_minimal(async_client: TestClientFixture):
 
 
 @pytest.mark.asyncio
-async def test_create_business_missing_name_returns_422(async_client: TestClientFixture):
-    """POST /api/v1/ without 'name' returns 422 validation error."""
-    resp = await async_client.ac.post("/api/v1/", json={})
+async def test_create_business_missing_name_returns_422(async_client: ClientFixture):
+    """POST /api/v1/businesses/ without 'name' returns 422 validation error."""
+    resp = await async_client.ac.post("/api/v1/businesses/", json={})
     assert resp.status_code == 422
 
 
-# =============================================================================
-# GET /api/v1/ — list  |  GET /api/v1/{id} — get single
-# =============================================================================
-
 @pytest.mark.asyncio
-async def test_list_businesses(async_client: TestClientFixture):
-    """GET /api/v1/ returns a paginated list of businesses."""
+async def test_list_businesses(async_client: ClientFixture):
+    """GET /api/v1/businesses/ returns a paginated list of businesses."""
     for name in ["List Biz Alpha", "List Biz Beta"]:
-        await async_client.ac.post("/api/v1/", json={"name": name})
+        await async_client.ac.post("/api/v1/businesses/", json={"name": name})
 
-    resp = await async_client.ac.get("/api/v1/")
+    resp = await async_client.ac.get("/api/v1/businesses/")
     assert resp.status_code == 200
     data = resp.json()
     assert "items" in data
@@ -218,15 +215,15 @@ async def test_list_businesses(async_client: TestClientFixture):
 
 
 @pytest.mark.asyncio
-async def test_get_business_by_id(async_client: TestClientFixture):
-    """GET /api/v1/{id} returns the correct business record."""
+async def test_get_business_by_id(async_client: ClientFixture):
+    """GET /api/v1/businesses/{id} returns the correct business record."""
     # Create
-    create_resp = await async_client.ac.post("/api/v1/", json={"name": "Fetch Test Biz"})
+    create_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Fetch Test Biz"})
     assert create_resp.status_code == 201
     biz_id = create_resp.json()["id"]
 
     # Read
-    get_resp = await async_client.ac.get(f"/api/v1/{biz_id}")
+    get_resp = await async_client.ac.get(f"/api/v1/businesses/{biz_id}")
     assert get_resp.status_code == 200
     data = get_resp.json()
     assert data["id"] == biz_id
@@ -234,28 +231,29 @@ async def test_get_business_by_id(async_client: TestClientFixture):
 
 
 @pytest.mark.asyncio
-async def test_get_business_not_found(async_client: TestClientFixture):
-    """GET /api/v1/{nonexistent_id} returns 404."""
+async def test_get_business_not_found(async_client: ClientFixture):
+    """GET /api/v1/businesses/{nonexistent_id} returns 404."""
     fake_id = str(uuid.uuid4())
-    resp = await async_client.ac.get(f"/api/v1/{fake_id}")
+    resp = await async_client.ac.get(f"/api/v1/businesses/{fake_id}")
     assert resp.status_code == 404
 
 
 # =============================================================================
-# POST /api/v1/ — websites  (needs business first)
-# GET /api/v1/{id} — get single website
+# POST /api/v1/websites/ — create
+# GET /api/v1/websites/  — list
+# GET /api/v1/websites/{id} — read single
 # =============================================================================
 
 @pytest.mark.asyncio
-async def test_create_website(async_client: TestClientFixture):
-    """POST /api/v1/ (websites) creates a website linked to a business."""
+async def test_create_website(async_client: ClientFixture):
+    """POST /api/v1/websites/ creates a website linked to a business."""
     # Create parent business first
-    biz_resp = await async_client.ac.post("/api/v1/", json={"name": "Biz For Website Test"})
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Biz For Website Test"})
     assert biz_resp.status_code == 201
     biz_id = biz_resp.json()["id"]
 
     # Create website
-    site_resp = await async_client.ac.post("/api/v1/", json={
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
         "business_id": biz_id,
         "url": "https://acme-dispensary.example.com",
         "name": "Acme Website",
@@ -270,14 +268,14 @@ async def test_create_website(async_client: TestClientFixture):
     site_uuid = uuid.UUID(site_data["id"])
     site = await async_client.verify_website_in_db(site_uuid)
     assert site is not None
-    assert site["business_id"] == str(uuid.UUID(biz_id))
+    assert str(site["business_id"]).replace("-", "") == str(uuid.UUID(biz_id)).replace("-", "")
 
 
 @pytest.mark.asyncio
-async def test_create_website_requires_valid_business(async_client: TestClientFixture):
-    """POST /api/v1/ (websites) with nonexistent business_id returns 404."""
+async def test_create_website_requires_valid_business(async_client: ClientFixture):
+    """POST /api/v1/websites/ with nonexistent business_id returns 404."""
     fake_biz_id = str(uuid.uuid4())
-    resp = await async_client.ac.post("/api/v1/", json={
+    resp = await async_client.ac.post("/api/v1/websites/", json={
         "business_id": fake_biz_id,
         "url": "https://example.com",
     })
@@ -285,17 +283,17 @@ async def test_create_website_requires_valid_business(async_client: TestClientFi
 
 
 @pytest.mark.asyncio
-async def test_get_website_by_id(async_client: TestClientFixture):
-    """GET /api/v1/{id} (websites) returns the correct website."""
-    biz_resp = await async_client.ac.post("/api/v1/", json={"name": "Site GET Test"})
+async def test_get_website_by_id(async_client: ClientFixture):
+    """GET /api/v1/websites/{id} returns the correct website."""
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Site GET Test"})
     biz_id = biz_resp.json()["id"]
-    site_resp = await async_client.ac.post("/api/v1/", json={
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
         "business_id": biz_id,
         "url": "https://get-site.example.com",
     })
     site_id = site_resp.json()["id"]
 
-    get_resp = await async_client.ac.get(f"/api/v1/{site_id}")
+    get_resp = await async_client.ac.get(f"/api/v1/websites/{site_id}")
     assert get_resp.status_code == 200
     data = get_resp.json()
     assert data["id"] == site_id
@@ -303,19 +301,20 @@ async def test_get_website_by_id(async_client: TestClientFixture):
 
 
 # =============================================================================
-# POST /api/v1/ — crawls  (needs business → website first)
-# GET /api/v1/{id} — get single crawl
+# POST /api/v1/crawls/ — create
+# GET /api/v1/crawls/  — list
+# GET /api/v1/crawls/{id} — read single
 # =============================================================================
 
 @pytest.mark.asyncio
-async def test_create_crawl(async_client: TestClientFixture):
-    """POST /api/v1/ (crawls) creates a CrawlRun with PENDING status."""
+async def test_create_crawl(async_client: ClientFixture):
+    """POST /api/v1/crawls/ creates a CrawlRun with PENDING status."""
     # Setup: business → website
-    biz_resp = await async_client.ac.post("/api/v1/", json={"name": "Biz For Crawl Test"})
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Biz For Crawl Test"})
     assert biz_resp.status_code == 201
     biz_id = biz_resp.json()["id"]
 
-    site_resp = await async_client.ac.post("/api/v1/", json={
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
         "business_id": biz_id,
         "url": "https://crawl-target.example.com",
     })
@@ -323,7 +322,7 @@ async def test_create_crawl(async_client: TestClientFixture):
     site_id = site_resp.json()["id"]
 
     # Create crawl run
-    crawl_resp = await async_client.ac.post("/api/v1/", json={
+    crawl_resp = await async_client.ac.post("/api/v1/crawls/", json={
         "website_id": site_id,
         "crawl_depth": 2,
         "max_pages": 10,
@@ -340,33 +339,33 @@ async def test_create_crawl(async_client: TestClientFixture):
     crawl_uuid = uuid.UUID(crawl_data["id"])
     crawl = await async_client.verify_crawl_in_db(crawl_uuid)
     assert crawl is not None
-    assert crawl["website_id"] == str(uuid.UUID(site_id))
+    assert str(crawl["website_id"]).replace("-", "") == str(uuid.UUID(site_id)).replace("-", "")
 
 
 @pytest.mark.asyncio
-async def test_create_crawl_requires_valid_website(async_client: TestClientFixture):
-    """POST /api/v1/ (crawls) with nonexistent website_id returns 404."""
+async def test_create_crawl_requires_valid_website(async_client: ClientFixture):
+    """POST /api/v1/crawls/ with nonexistent website_id returns 404."""
     fake_site_id = str(uuid.uuid4())
-    resp = await async_client.ac.post("/api/v1/", json={"website_id": fake_site_id})
+    resp = await async_client.ac.post("/api/v1/crawls/", json={"website_id": fake_site_id})
     assert resp.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_get_crawl_by_id(async_client: TestClientFixture):
-    """GET /api/v1/{id} (crawls) returns the correct crawl run."""
+async def test_get_crawl_by_id(async_client: ClientFixture):
+    """GET /api/v1/crawls/{id} returns the correct crawl run."""
     # Setup
-    biz_resp = await async_client.ac.post("/api/v1/", json={"name": "Crawl GET Test"})
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Crawl GET Test"})
     biz_id = biz_resp.json()["id"]
-    site_resp = await async_client.ac.post("/api/v1/", json={
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
         "business_id": biz_id,
         "url": "https://get-crawl.example.com",
     })
     site_id = site_resp.json()["id"]
-    crawl_resp = await async_client.ac.post("/api/v1/", json={"website_id": site_id})
+    crawl_resp = await async_client.ac.post("/api/v1/crawls/", json={"website_id": site_id})
     crawl_id = crawl_resp.json()["id"]
 
     # Read
-    get_resp = await async_client.ac.get(f"/api/v1/{crawl_id}")
+    get_resp = await async_client.ac.get(f"/api/v1/crawls/{crawl_id}")
     assert get_resp.status_code == 200
     data = get_resp.json()
     assert data["id"] == crawl_id

@@ -13,7 +13,7 @@ from services.api.schemas.page import PageList, PageRead, PageSummary
 router = APIRouter()
 
 
-@router.get("/", response_model=PageList, status_code=status.HTTP_200_OK)
+@router.get("/pages/", response_model=PageList, status_code=status.HTTP_200_OK)
 async def list_pages(
     crawl_run_id: UUID | None = None,
     is_indexable: bool | None = None,
@@ -48,7 +48,7 @@ async def list_pages(
     return PageList(items=items, total=total or 0, page=skip // limit + 1, page_size=limit)
 
 
-@router.get("/{page_id}", response_model=PageRead, status_code=status.HTTP_200_OK)
+@router.get("/pages/{page_id}", response_model=PageRead, status_code=status.HTTP_200_OK)
 async def get_page(
     page_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -65,7 +65,7 @@ async def get_page(
     return page
 
 
-@router.get("/summary/{page_id}", response_model=PageSummary, status_code=status.HTTP_200_OK)
+@router.get("/pages/summary/{page_id}", response_model=PageSummary, status_code=status.HTTP_200_OK)
 async def get_page_summary(
     page_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -90,7 +90,7 @@ async def get_page_summary(
     )
 
 
-@router.get("/by-url/", response_model=PageRead, status_code=status.HTTP_200_OK)
+@router.get("/pages/by-url/", response_model=PageRead, status_code=status.HTTP_200_OK)
 async def get_page_by_url(
     url: str,
     crawl_run_id: UUID = Query(..., description="Crawl run to search within"),

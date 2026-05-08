@@ -1,8 +1,8 @@
 # SeoIssue model.
 
 import uuid
-from sqlalchemy import Enum, ForeignKey, String, Text, UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Enum, ForeignKey, String, Text, Uuid
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import IssueSeverity
@@ -11,13 +11,13 @@ class SeoIssue(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "seo_issues"
 
     page_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("pages.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     crawl_run_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("crawl_runs.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
