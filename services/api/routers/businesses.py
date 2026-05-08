@@ -80,7 +80,6 @@ async def create_business(
     )
     db.add(business)
     await db.flush()
-    await db.refresh(business)
     return business
 
 
@@ -105,7 +104,6 @@ async def update_business(
         setattr(business, field, value)
 
     await db.flush()
-    await db.refresh(business)
     return business
 
 

@@ -91,7 +91,7 @@ async def trigger_crawl(
     )
     db.add(crawl_run)
     await db.flush()
-    await db.refresh(crawl_run)
+    return crawl_run
 
     logger.info(
         "Crawl run created, queuing worker",
@@ -151,7 +151,7 @@ async def cancel_crawl_run(
 
     crawl_run.status = CrawlStatus.CANCELLED
     await db.flush()
-    await db.refresh(crawl_run)
+    return crawl_run
 
     logger.info("Crawl run cancelled", extra={"crawl_run_id": str(crawl_run_id)})
 

@@ -87,7 +87,6 @@ async def create_website(
     )
     db.add(website)
     await db.flush()
-    await db.refresh(website)
     return website
 
 
@@ -112,7 +111,6 @@ async def update_website(
         setattr(website, field, value)
 
     await db.flush()
-    await db.refresh(website)
     return website
 
 
