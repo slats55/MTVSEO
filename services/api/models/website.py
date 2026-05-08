@@ -10,7 +10,10 @@ class Website(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "websites"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("businesses.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     name: Mapped[str | None] = mapped_column(String(255))

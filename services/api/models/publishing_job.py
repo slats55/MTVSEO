@@ -12,7 +12,10 @@ class PublishingJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "publishing_jobs"
 
     content_draft_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("content_drafts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     destination: Mapped[PublishDestination] = mapped_column(
         Enum(PublishDestination), nullable=False

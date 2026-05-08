@@ -11,7 +11,10 @@ class ContentBrief(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "content_briefs"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("websites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     keyword_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("keywords.id")

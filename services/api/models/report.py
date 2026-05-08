@@ -11,7 +11,10 @@ class Report(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "reports"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("businesses.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     report_type: Mapped[ReportType] = mapped_column(Enum(ReportType), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)

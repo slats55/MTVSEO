@@ -10,7 +10,10 @@ class TopicCluster(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "topic_clusters"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("websites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     pillar_page_url: Mapped[str | None] = mapped_column(String(2000))

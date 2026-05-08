@@ -10,7 +10,10 @@ class Page(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "pages"
 
     crawl_run_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("crawl_runs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     url: Mapped[str] = mapped_column(String(2000), nullable=False)
     canonical_url: Mapped[str | None] = mapped_column(String(2000))

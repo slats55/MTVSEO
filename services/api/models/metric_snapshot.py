@@ -11,7 +11,10 @@ class MetricSnapshot(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "metric_snapshots"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("businesses.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
     seo_score: Mapped[float | None] = mapped_column(Float)

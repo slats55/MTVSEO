@@ -33,21 +33,40 @@ model FK bugs. See "Known Model FK Issues" below.
 | `test_crawls_root_accepts_post` | HTTP method acceptance smoke |
 | `test_database_session_from_sqlite_engine` | DB session smoke |
 
-> Note: These are HTTP-level smoke tests (route mount + method acceptance).
-> Full CRUD endpoint tests (insert/select/update) are blocked by model FK bugs.
+> Note: these are HTTP-level smoke tests (route mount + method acceptance).
+> Full CRUD endpoint tests are now unblocked after systemic FK fix (see below).
 > The "not 404/405" assertions confirm routes are mounted and methods are defined;
 > they do NOT verify business logic or database write/read cycles.
 
-**Known Model FK Issues (not yet fixed — separate task):**
-The following relationships are declared in models but lack `ForeignKey` on the
-referencing column, causing SQLAlchemy ORM mapper-configuration to fail:
+**Known Model FK Issues — ALL FIXED in this session:**
+The following were all fixed in a single systemic pass:
+- `AgentRunLog.agent_task_id` → `AgentTask.id` (ForeignKey added to model)
+- `AgentTask.created_by` → `users.id` (ForeignKey added to model + migration)
+- `Business.user_id` → `users.id` (ForeignKey added to model)
+- `Website.business_id` → `businesses.id` (ForeignKey added to model)
+- `Competitor.business_id` → `businesses.id` (ForeignKey added to model)
+- `CrawlRun.website_id` → `websites.id` (ForeignKey added to model)
+- `Page.crawl_run_id` → `crawl_runs.id` (ForeignKey added to model)
+- `PageSnapshot.page_id` → `pages.id` (ForeignKey added to model)
+- `SeoIssue.page_id` + `crawl_run_id` (ForeignKey added to model)
+- `GeoIssue.page_id` + `crawl_run_id` (ForeignKey added to model)
+- `Keyword.website_id` → `websites.id` (ForeignKey added to model)
+- `TopicCluster.website_id` → `websites.id` (ForeignKey added to model)
+- `ContentBrief.website_id` → `websites.id` (ForeignKey added to model)
+- `ContentDraft.content_brief_id` → `content_briefs.id` (ForeignKey added to model)
+- `SchemaDraft.website_id` → `websites.id` (ForeignKey added to model)
+- `Report.business_id` → `businesses.id` (ForeignKey added to model)
+- `MetricSnapshot.business_id` → `businesses.id` (ForeignKey added to model)
+- `PublishingJob.content_draft_id` → `content_drafts.id` (ForeignKey added to model)
+- `InternalLinkOpportunity.website_id` → `websites.id` (ForeignKey added to model)
 
-- `AgentTask.creator` → `User` — `created_by` column has no FK constraint
-- (`AgentRunLog.task` → `AgentTask` — FIXED in this session)
+**Migration added:** `services/api/migrations/versions/20260507_0001_add_agent_task_creator_fk.py`
+- Adds `ix_agent_tasks_created_by` index and `fk_agent_tasks_created_by` FK to `agent_tasks.created_by → users.id` (ondelete SET NULL)
+- This was the only FK genuinely missing from the original migration; all other FKs in models now match constraints already defined in `20260505_1200_initial_migration.py`
 
-The missing FK on `AgentTask.created_by` means any ORM query that touches the
-`creator` relationship raises `NoForeignKeysError` at mapper init time, making
-it impossible to write real DB-backed endpoint tests until it's resolved.
+**Alembic test updated:** `test_alembic_smoke.py` — head is now `20260507_0001`
+- All ORM relationship configuration now succeeds without `NoForeignKeysError`
+- Full DB-backed CRUD endpoint tests are now unblocked
 
 ---
 

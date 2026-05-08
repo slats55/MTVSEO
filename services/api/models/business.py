@@ -1,7 +1,7 @@
 # Business model.
 
 import uuid
-from sqlalchemy import Boolean, String, Text, UUID
+from sqlalchemy import Boolean, ForeignKey, String, Text, UUID
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -10,7 +10,10 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "businesses"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     website_url: Mapped[str | None] = mapped_column(String(500))

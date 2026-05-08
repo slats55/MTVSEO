@@ -10,7 +10,10 @@ class Competitor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "competitors"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("businesses.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)

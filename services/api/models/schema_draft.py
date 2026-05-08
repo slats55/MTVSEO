@@ -11,7 +11,10 @@ class SchemaDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "schema_drafts"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("websites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     page_url: Mapped[str | None] = mapped_column(String(2000))
     schema_type: Mapped[str | None] = mapped_column(String(100))

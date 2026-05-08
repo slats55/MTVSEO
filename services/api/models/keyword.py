@@ -11,7 +11,10 @@ class Keyword(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "keywords"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("websites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     keyword: Mapped[str] = mapped_column(String(500), nullable=False)
     intent: Mapped[KeywordIntent | None] = mapped_column(Enum(KeywordIntent))

@@ -12,7 +12,10 @@ class CrawlRun(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "crawl_runs"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("websites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     status: Mapped[CrawlStatus] = mapped_column(
         Enum(CrawlStatus), default=CrawlStatus.PENDING, nullable=False

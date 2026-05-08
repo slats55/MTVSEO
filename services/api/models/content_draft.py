@@ -12,7 +12,10 @@ class ContentDraft(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "content_drafts"
 
     content_brief_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("content_briefs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     title: Mapped[str | None] = mapped_column(String(500))
     slug: Mapped[str | None] = mapped_column(String(500))

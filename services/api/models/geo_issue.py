@@ -11,10 +11,16 @@ class GeoIssue(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "geo_issues"
 
     page_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("pages.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     crawl_run_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("crawl_runs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     issue_type: Mapped[str] = mapped_column(String(100), nullable=False)
     severity: Mapped[IssueSeverity] = mapped_column(Enum(IssueSeverity), nullable=False)
