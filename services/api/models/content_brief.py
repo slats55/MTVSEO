@@ -1,8 +1,8 @@
 # ContentBrief model.
 
 import uuid
-from sqlalchemy import Enum, ForeignKey, Integer, JSON, String, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Enum, ForeignKey, Integer, JSON, String, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import BriefStatus, KeywordIntent
@@ -11,13 +11,13 @@ class ContentBrief(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "content_briefs"
 
     website_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("websites.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     keyword_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("keywords.id")
+        Uuid, ForeignKey("keywords.id")
     )
     title: Mapped[str | None] = mapped_column(String(500))
     target_url: Mapped[str | None] = mapped_column(String(2000))
@@ -32,7 +32,7 @@ class ContentBrief(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     status: Mapped[BriefStatus] = mapped_column(
         Enum(BriefStatus), default=BriefStatus.DRAFT, nullable=False
     )
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
 
     # Relationships
     website = relationship("Website")

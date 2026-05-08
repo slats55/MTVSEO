@@ -1,8 +1,8 @@
 # Report model.
 
 import uuid
-from sqlalchemy import Enum, Float, ForeignKey, Integer, JSON, String, Text, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Enum, Float, ForeignKey, Integer, JSON, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 from .enums import ReportType
@@ -11,7 +11,7 @@ class Report(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "reports"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("businesses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -26,7 +26,7 @@ class Report(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     geo_issues_count: Mapped[int | None] = mapped_column(Integer)
     top_recommendations: Mapped[list | None] = mapped_column(JSON, default=list)
     file_path: Mapped[str | None] = mapped_column(String(500))
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
 
     # Relationships
     business = relationship("Business", back_populates="reports")

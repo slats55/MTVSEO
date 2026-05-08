@@ -2,8 +2,8 @@
 from datetime import date, datetime
 
 import uuid
-from sqlalchemy import Date, Float, ForeignKey, Integer, JSON, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Date, Float, ForeignKey, Integer, JSON, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
@@ -11,7 +11,7 @@ class MetricSnapshot(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "metric_snapshots"
 
     business_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("businesses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

@@ -1,8 +1,8 @@
 # Page model.
 
 import uuid
-from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text, UUID
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
@@ -10,7 +10,7 @@ class Page(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "pages"
 
     crawl_run_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("crawl_runs.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -34,7 +34,7 @@ class Page(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_robots_blocked: Mapped[bool] = mapped_column(Boolean, default=False)
     crawl_depth: Mapped[int | None] = mapped_column(Integer)
     parent_page_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("pages.id")
+        Uuid, ForeignKey("pages.id")
     )
     redirect_url: Mapped[str | None] = mapped_column(String(2000))
 
