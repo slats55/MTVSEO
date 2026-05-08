@@ -53,6 +53,8 @@ dmypy.json
 # Node / npm (apps/web)
 # =============================================================================
 node_modules/
+.next/
+next-env.d.ts
 .npm
 .eslintcache
 .node_repl_history
