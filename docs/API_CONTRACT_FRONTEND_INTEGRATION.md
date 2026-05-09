@@ -3,10 +3,8 @@
 ## Context
 
 - **Base branch:** `feature/backend-phase2`
-- **Base commit:** `f30bb33` ("Merge AgentTask foreign key constraints")
-- **Purpose:** Document the stable REST API route contracts for future frontend integration. This is a read-only reference document. No backend implementation changes are made in this branch.
-- **Scope:** All `/api/v1/` REST routes for businesses, websites, crawls, and pages.
-- **Frontend audience:** Agents wiring the Step Flash dashboard mock UI, and any future React/Vue/Svelte frontend consuming this API.
+- **Base commit:** `4f78e73` ("Merge Step Flash mock dashboard UI") — this branch was merged with the Step Flash mock UI files (page.tsx, metric-card.tsx, status-badge.tsx, utils.ts) and docs (STEP_FLASH_MOCK_UI_*.md) before final push.
+- **Purpose:** Document the stable REST API route contracts for wiring the Step Flash mock dashboard UI to the backend. This contract was created after the mock dashboard was merged so frontend agents can safely replace mock data with real API calls.
 
 ---
 
