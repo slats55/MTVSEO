@@ -21,8 +21,8 @@ def test_alembic_heads_discovers_migration():
     )
 
     assert result.returncode == 0, f"alembic heads failed: {result.stderr}"
-    # Expected: 20260507_0001 (head, added FK for agent_tasks.created_by)
-    assert "20260507_0001" in result.stdout, f"Expected migration head not found in: {result.stdout}"
+    # Expected: 20260508_0001 (head, added FKs for agent_tasks.business_id and website_id)
+    assert "20260508_0001" in result.stdout, f"Expected migration head not found in: {result.stdout}"
 
 
 def test_alembic_shows_migration_info():
