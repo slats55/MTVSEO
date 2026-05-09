@@ -3,7 +3,9 @@
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { useCrawls } from "@/lib/queries/useCrawls";
+import { useBusinesses } from "@/lib/queries/useBusinesses";
 import { CRAWL_STATUS_LABELS } from "@/lib/api/types/crawls";
+import { Building2 } from "lucide-react";
 import {
   Activity,
   AlertTriangle,
@@ -74,7 +76,8 @@ const MOCK_CRAWLS = [
 ];
 
 export default function DashboardPage() {
-  const { data, isLoading, isError } = useCrawls();
+  const { data: crawlData, isLoading: crawlLoading, isError: crawlError } = useCrawls();
+  const { data: businessData, isLoading: bizLoading, isError: bizError } = useBusinesses();
 
   function timeAgo(isoDate: string): string {
     const diff = Date.now() - new Date(isoDate).getTime();
@@ -86,7 +89,7 @@ export default function DashboardPage() {
     return `${days}d ago`;
   }
 
-  const crawlRows = data?.items.slice(0, 4).map((crawl) => ({
+  const crawlRows = crawlData?.items.slice(0, 4).map((crawl) => ({
     id: crawl.id,
     website_id: crawl.website_id,
     status: crawl.status,
@@ -95,7 +98,7 @@ export default function DashboardPage() {
   })) ?? [];
 
   const displayCrawls =
-    crawlRows.length > 0 ? crawlRows : isLoading ? [] : MOCK_CRAWLS;
+    crawlRows.length > 0 ? crawlRows : crawlLoading ? [] : MOCK_CRAWLS;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -152,6 +155,66 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Business Projects Overview */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-white">Business Projects</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Active businesses in your account</p>
+          </div>
+          <a href="/businesses" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+            Manage <ArrowUpRight className="h-3 w-3" />
+          </a>
+        </div>
+        {bizLoading && (
+          <div className="flex items-center justify-center py-8">
+            <span className="text-sm text-slate-500">Loading businesses...</span>
+          </div>
+        )}
+        {bizError && (
+          <div className="flex items-center justify-center py-8">
+            <span className="text-sm text-red-400">Failed to load businesses</span>
+          </div>
+        )}
+        {!bizLoading && !bizError && businessData?.items?.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            <Building2 className="h-8 w-8 text-slate-600" />
+            <span className="text-sm text-slate-500">No businesses yet.</span>
+            <span className="text-xs text-slate-600">Create one from the Businesses page.</span>
+          </div>
+        )}
+        {!bizLoading && !bizError && businessData?.items && businessData.items.length > 0 && (
+          <div className="divide-y divide-slate-800">
+            {businessData.items.slice(0, 4).map((biz) => (
+              <div key={biz.id} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-800/40 transition-colors">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-900/40 text-blue-400">
+                  <Building2 className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-200 truncate">{biz.name}</p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {biz.location ?? biz.business_type ?? "No location"}
+                    {biz.website_url && ` — ${biz.website_url}`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {biz.is_cannabis && (
+                    <span className="inline-flex items-center rounded-full bg-green-900/30 px-2 py-0.5 text-xs text-green-400">
+                      Cannabis
+                    </span>
+                  )}
+                  {biz.is_ymyl && (
+                    <span className="inline-flex items-center rounded-full bg-yellow-900/30 px-2 py-0.5 text-xs text-yellow-400">
+                      YMYL
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Crawls */}
@@ -177,28 +240,28 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {isLoading && (
+                {crawlLoading && (
                   <tr>
                     <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
                       Loading crawls...
                     </td>
                   </tr>
                 )}
-                {isError && (
+                {crawlError && (
                   <tr>
                     <td colSpan={5} className="px-5 py-8 text-center">
                       <span className="text-red-400 text-sm">Failed to load crawls</span>
                     </td>
                   </tr>
                 )}
-                {!isLoading && displayCrawls.length === 0 && (
+                {!crawlLoading && displayCrawls.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
                       No crawls yet. Run your first crawl from the Businesses page.
                     </td>
                   </tr>
                 )}
-                {!isLoading && displayCrawls.map((crawl) => (
+                {!crawlLoading && displayCrawls.map((crawl) => (
                   <tr key={crawl.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-5 py-3 text-slate-200 font-mono text-xs">
                       <span title={crawl.website_id}>{crawl.website_id.slice(0, 8)}…</span>
