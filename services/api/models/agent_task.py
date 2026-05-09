@@ -12,8 +12,16 @@ class AgentTask(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "agent_tasks"
 
     task_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    business_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
-    website_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    business_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("businesses.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    website_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("websites.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     status: Mapped[AgentTaskStatus] = mapped_column(
         Enum(AgentTaskStatus), default=AgentTaskStatus.PENDING, nullable=False
     )
