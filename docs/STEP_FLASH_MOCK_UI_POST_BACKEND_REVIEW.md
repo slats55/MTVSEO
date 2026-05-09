@@ -26,13 +26,31 @@ The merge brought in:
 
 | Check | Result |
 |-------|--------|
-| **npm install** | ✅ Succeeded (393 packages) |
-| **npm run build** | ❌ **Failed** — `Module not found: Can't resolve '@/lib/utils'` |
+| **npm install** | ✅ Succeeded (394 packages, added tailwind-merge) |
+| **npm run build** | ✅ **Passes** — Fixed with `src/lib/utils.ts` |
 | **python scripts/verify_local.py** | ✅ ALL CHECKS PASSED |
 | **pytest tests/ -q** | ✅ 34 passed |
 | **python -m compileall services packages tests** | ✅ No errors |
 
 **Frontend build error** is a **pre-existing issue** in the UI branch (components `metric-card.tsx` and `status-badge.tsx` import `@/lib/utils` which does not exist). This is not a regression from the backend merge.
+
+## Utility Module Fix
+
+**Applied:** Added missing `src/lib/utils.ts` with standard `cn` utility.
+
+- Created `apps/web/src/lib/utils.ts`:
+  ```typescript
+  import { type ClassValue, clsx } from "clsx";
+  import { twMerge } from "tailwind-merge";
+
+  export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+  }
+  ```
+- Installed `tailwind-merge` dependency (clsx already present)
+- `npm run build` now **passes** ✅
+
+No backend files were modified.
 
 ## UI Diff Summary
 
@@ -70,35 +88,17 @@ The merge brought in:
 
 ## Merge Recommendation
 
-**NEEDS FIXES** — The frontend branch does not build in its current state due to missing utility dependency. It must be corrected before merging.
-
-**Specific issue:**
-- Components import `cn` from `@/lib/utils`, but the `src/lib/utils.ts` (or `.tsx`) file does not exist.
-- This is likely a missing shadcn/ui-style utility module. Typical content:
-
-```typescript
-// src/lib/utils.ts
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-```
-
-Also ensure `clsx` and `tailwind-merge` dependencies are installed.
+**READY TO MERGE** — Frontend builds successfully, backend remains stable and unaffected. No implementation files modified beyond the required utility addition.
 
 ## Recommended Next Step
 
-1. **Fix the frontend build** by adding the missing utility module:
-   ```bash
-   cd apps/web
-   npm install clsx tailwind-merge
-   echo 'import { type ClassValue, clsx } from "clsx";\nimport { twMerge } from "tailwind-merge";\nexport function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }' > src/lib/utils.ts
-   npm run build
-   ```
-2. After build succeeds, re-run verification (`pytest tests/ -q`) to ensure backend still passes.
-3. Then request explicit merge approval from Step Flash before merging into `feature/backend-phase2`.
+Merge `feature/stepflash-dashboard-shell-mock-ui` into `feature/backend-phase2`:
+
+```bash
+git checkout feature/backend-phase2
+git merge --no-ff feature/stepflash-dashboard-shell-mock-ui -m "Merge mock dashboard UI with backend API"
+git push origin feature/backend-phase2
+```
 
 ---
 
