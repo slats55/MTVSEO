@@ -2,6 +2,8 @@
 
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
+import { useCrawls } from "@/lib/queries/useCrawls";
+import { CRAWL_STATUS_LABELS } from "@/lib/api/types/crawls";
 import {
   Activity,
   AlertTriangle,
@@ -34,12 +36,7 @@ const quickActions = [
   { label: "Generate Report", icon: FileText, href: "/reports", description: "Export findings" },
 ];
 
-const recentCrawls = [
-  { id: "1", website: "mtvhvac.com", status: "completed", pages: 47, score: 72, date: "2h ago" },
-  { id: "2", website: "green-culture.co", status: "completed", pages: 31, score: 61, date: "1d ago" },
-  { id: "3", website: "countryroadsauto.com", status: "failed", pages: 12, score: null, date: "2d ago" },
-  { id: "4", website: "example.org", status: "completed", pages: 89, score: 85, date: "3d ago" },
-];
+
 
 const topIssues = [
   { severity: "high", count: 3, title: "Missing meta descriptions on 12 pages", category: "On-Page SEO" },
@@ -56,17 +53,50 @@ const keywordOpportunities = [
 ];
 
 function getStatusVariant(status: string) {
-  switch (status) {
+  switch (status.toLowerCase()) {
     case "completed":
       return "success" as const;
     case "failed":
       return "error" as const;
+    case "running":
+      return "info" as const;
     default:
       return "neutral" as const;
   }
 }
 
+// Fallback mock data when API is unavailable
+const MOCK_CRAWLS = [
+  { id: "1", website_id: "mock-1", status: "COMPLETED", pages: 47, date: "2h ago" },
+  { id: "2", website_id: "mock-2", status: "COMPLETED", pages: 31, date: "1d ago" },
+  { id: "3", website_id: "mock-3", status: "FAILED", pages: 12, date: "2d ago" },
+  { id: "4", website_id: "mock-4", status: "COMPLETED", pages: 89, date: "3d ago" },
+];
+
 export default function DashboardPage() {
+  const { data, isLoading, isError } = useCrawls();
+
+  function timeAgo(isoDate: string): string {
+    const diff = Date.now() - new Date(isoDate).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  }
+
+  const crawlRows = data?.items.slice(0, 4).map((crawl) => ({
+    id: crawl.id,
+    website_id: crawl.website_id,
+    status: crawl.status,
+    pages: crawl.pages_crawled,
+    date: crawl.started_at ? timeAgo(crawl.started_at) : timeAgo(crawl.created_at),
+  })) ?? [];
+
+  const displayCrawls =
+    crawlRows.length > 0 ? crawlRows : isLoading ? [] : MOCK_CRAWLS;
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -147,24 +177,41 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {recentCrawls.map((crawl) => (
+                {isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
+                      Loading crawls...
+                    </td>
+                  </tr>
+                )}
+                {isError && (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center">
+                      <span className="text-red-400 text-sm">Failed to load crawls</span>
+                    </td>
+                  </tr>
+                )}
+                {!isLoading && displayCrawls.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
+                      No crawls yet. Run your first crawl from the Businesses page.
+                    </td>
+                  </tr>
+                )}
+                {!isLoading && displayCrawls.map((crawl) => (
                   <tr key={crawl.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-5 py-3 text-slate-200 font-mono text-xs">{crawl.website}</td>
+                    <td className="px-5 py-3 text-slate-200 font-mono text-xs">
+                      <span title={crawl.website_id}>{crawl.website_id.slice(0, 8)}…</span>
+                    </td>
                     <td className="px-5 py-3">
-                      <StatusBadge status={getStatusVariant(crawl.status)} label={crawl.status} />
+                      <StatusBadge
+                        status={getStatusVariant(crawl.status)}
+                        label={CRAWL_STATUS_LABELS[crawl.status as keyof typeof CRAWL_STATUS_LABELS] ?? crawl.status}
+                      />
                     </td>
                     <td className="px-5 py-3 text-slate-300">{crawl.pages}</td>
                     <td className="px-5 py-3">
-                      {crawl.score ? (
-                        <span className={`font-semibold ${
-                          crawl.score >= 80 ? "text-green-400" :
-                          crawl.score >= 60 ? "text-yellow-400" : "text-red-400"
-                        }`}>
-                          {crawl.score}
-                        </span>
-                      ) : (
-                        <span className="text-slate-600">—</span>
-                      )}
+                      <span className="text-slate-600">—</span>
                     </td>
                     <td className="px-5 py-3 text-slate-500">{crawl.date}</td>
                   </tr>

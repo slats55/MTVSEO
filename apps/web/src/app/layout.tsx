@@ -10,7 +10,7 @@ import {
   Settings,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { Providers } from "./providers";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -57,8 +57,10 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* Main content */}
-        <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+{/* Main content */}
+        <main className="min-h-[calc(100vh-3.5rem)]">
+          <Providers>{children}</Providers>
+        </main>
       </body>
     </html>
   );
