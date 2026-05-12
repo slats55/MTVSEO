@@ -100,7 +100,7 @@ interface SeoIssue {
 - No hardcoded API URLs — uses `API_ROUTES` constants
 - No fake live data — API-powered only with empty-state fallback
 - The `topIssues` mock array was removed from page.tsx
-- The mock crawls (`MOCK_CRAWLS`) are preserved as fallback only when API returns 0 items and is not loading
+- The mock crawls (`MOCK_CRAWLS`) were removed; Recent Crawls shows real API rows only, with empty state when API returns 0 items
 
 ## Frontend Type Alignment
 

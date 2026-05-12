@@ -62,8 +62,6 @@ function getStatusVariant(status: string) {
   }
 }
 
-// Fallback mock data when API is unavailable
-
 export default function DashboardPage() {
   const { data: crawlData, isLoading: crawlLoading, isError: crawlError } = useCrawls();
   const { data: businessData, isLoading: bizLoading, isError: bizError } = useBusinesses();
