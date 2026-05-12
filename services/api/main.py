@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from packages.shared import configure_root_logger, get_logger
 from packages.shared.exceptions import SeoAgentException
 from services.api.config import get_settings
-from services.api.routers import businesses, crawls, pages, websites
+from services.api.routers import businesses, crawls, pages, seo_issues, websites
 
 settings = get_settings()
 logger = get_logger(__name__)
@@ -108,6 +108,7 @@ def create_app() -> FastAPI:
     app.include_router(websites.router, prefix=api_prefix, tags=["websites"])
     app.include_router(crawls.router, prefix=api_prefix, tags=["crawls"])
     app.include_router(pages.router, prefix=api_prefix, tags=["pages"])
+    app.include_router(seo_issues.router, prefix=api_prefix, tags=["seo-issues"])
 
     # Disable trailing-slash redirects globally — tests use specific paths
     # and FastAPI's default redirect_slashes=True issues 307s that convert
