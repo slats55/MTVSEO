@@ -28,6 +28,9 @@ from services.api.models import Base, User
 from services.api.models.business import Business
 from services.api.models.crawl_run import CrawlRun
 from services.api.models.website import Website
+from services.api.models.page import Page
+from services.api.models.seo_issue import SeoIssue
+from services.api.models.enums import IssueSeverity, CrawlStatus
 from services.api.main import create_app
 
 # Placeholder user ID — matches hardcoded user_id in businesses.py::create_business
@@ -370,3 +373,194 @@ async def test_get_crawl_by_id(async_client: ClientFixture):
     data = get_resp.json()
     assert data["id"] == crawl_id
     assert data["status"] == "PENDING"
+
+
+# =============================================================================
+# GET /api/v1/seo-issues/  — list (no POST endpoint; SeoIssues created by crawls)
+# GET /api/v1/seo-issues/{id} — read single
+# =============================================================================
+
+@pytest.mark.asyncio
+async def test_list_seo_issues_empty(async_client: ClientFixture):
+    """GET /api/v1/seo-issues/ with no records returns 200 with empty items list."""
+    resp = await async_client.ac.get("/api/v1/seo-issues/")
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+    data = resp.json()
+    assert "items" in data
+    assert "total" in data
+    assert data["items"] == []
+    assert data["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_list_seo_issues_returns_seeded_records(async_client: ClientFixture):
+    """GET /api/v1/seo-issues/ returns seeded SeoIssue records."""
+    # Setup: business → website → crawl_run → page → seo_issue
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Biz For SeoIssue Test"})
+    assert biz_resp.status_code == 201
+    biz_id = biz_resp.json()["id"]
+
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
+        "business_id": biz_id,
+        "url": "https://seo-issue-test.example.com",
+    })
+    assert site_resp.status_code == 201
+    site_id = site_resp.json()["id"]
+
+    crawl_resp = await async_client.ac.post("/api/v1/crawls/", json={"website_id": site_id})
+    assert crawl_resp.status_code == 201
+    crawl_id = crawl_resp.json()["id"]
+
+    # Create Page and SeoIssue directly in DB (no POST endpoints for these)
+    page_uuid = uuid.uuid4()
+    seo_issue_uuid = uuid.uuid4()
+
+    async with async_client._session_maker() as session:
+        page = Page(
+            id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            url="https://seo-issue-test.example.com/page1",
+            title="Test Page",
+            status_code=200,
+        )
+        session.add(page)
+        await session.flush()
+
+        seo_issue = SeoIssue(
+            id=seo_issue_uuid,
+            page_id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            issue_type="missing_h1",
+            severity=IssueSeverity.HIGH,
+            title="H1 tag is missing",
+            description="The page does not have an H1 tag.",
+            recommendation="Add an H1 tag to the page.",
+            affected_element="/html/head/h1",
+        )
+        session.add(seo_issue)
+        await session.commit()
+
+    # List endpoint
+    resp = await async_client.ac.get("/api/v1/seo-issues/")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] >= 1
+    items_by_id = {item["id"]: item for item in data["items"]}
+    assert str(seo_issue_uuid) in items_by_id
+    item = items_by_id[str(seo_issue_uuid)]
+    assert item["issue_type"] == "missing_h1"
+    assert item["severity"] == "HIGH"
+    assert item["title"] == "H1 tag is missing"
+
+
+@pytest.mark.asyncio
+async def test_list_seo_issues_filtered_by_crawl_run(async_client: ClientFixture):
+    """GET /api/v1/seo-issues/?crawl_run_id= filters correctly."""
+    # Setup same chain and create two SeoIssues
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Biz For Filter Test"})
+    biz_id = biz_resp.json()["id"]
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
+        "business_id": biz_id,
+        "url": "https://filter-test.example.com",
+    })
+    site_id = site_resp.json()["id"]
+    crawl_resp = await async_client.ac.post("/api/v1/crawls/", json={"website_id": site_id})
+    crawl_id = crawl_resp.json()["id"]
+
+    page_uuid = uuid.uuid4()
+    seo_issue_uuid = uuid.uuid4()
+
+    async with async_client._session_maker() as session:
+        page = Page(
+            id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            url="https://filter-test.example.com/page1",
+            title="Filter Test Page",
+            status_code=200,
+        )
+        session.add(page)
+        await session.flush()
+
+        seo_issue = SeoIssue(
+            id=seo_issue_uuid,
+            page_id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            issue_type="missing_meta_description",
+            severity=IssueSeverity.MEDIUM,
+            title="Meta description missing",
+            description="The page is missing a meta description.",
+        )
+        session.add(seo_issue)
+        await session.commit()
+
+    # Filter by crawl_run_id
+    resp = await async_client.ac.get(f"/api/v1/seo-issues/?crawl_run_id={crawl_id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] >= 1
+    assert all(item["crawl_run_id"] == crawl_id for item in data["items"])
+
+    # Filter by unrelated ID returns empty
+    fake_id = str(uuid.uuid4())
+    resp2 = await async_client.ac.get(f"/api/v1/seo-issues/?crawl_run_id={fake_id}")
+    assert resp2.status_code == 200
+    assert resp2.json()["items"] == []
+
+
+@pytest.mark.asyncio
+async def test_get_seo_issue_by_id(async_client: ClientFixture):
+    """GET /api/v1/seo-issues/{id} returns the correct SEO issue record."""
+    # Setup chain
+    biz_resp = await async_client.ac.post("/api/v1/businesses/", json={"name": "Biz For Get SeoIssue"})
+    biz_id = biz_resp.json()["id"]
+    site_resp = await async_client.ac.post("/api/v1/websites/", json={
+        "business_id": biz_id,
+        "url": "https://get-seo-issue.example.com",
+    })
+    site_id = site_resp.json()["id"]
+    crawl_resp = await async_client.ac.post("/api/v1/crawls/", json={"website_id": site_id})
+    crawl_id = crawl_resp.json()["id"]
+
+    page_uuid = uuid.uuid4()
+    seo_issue_uuid = uuid.uuid4()
+
+    async with async_client._session_maker() as session:
+        page = Page(
+            id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            url="https://get-seo-issue.example.com/page1",
+            status_code=200,
+        )
+        session.add(page)
+        await session.flush()
+
+        seo_issue = SeoIssue(
+            id=seo_issue_uuid,
+            page_id=page_uuid,
+            crawl_run_id=uuid.UUID(crawl_id),
+            issue_type="duplicate_title",
+            severity=IssueSeverity.INFO,
+            title="Duplicate title tag",
+            description="Title tag appears more than once.",
+            recommendation="Use unique title tags for each page.",
+            affected_element="/html/head/title",
+        )
+        session.add(seo_issue)
+        await session.commit()
+
+    # Read by ID
+    get_resp = await async_client.ac.get(f"/api/v1/seo-issues/{seo_issue_uuid}")
+    assert get_resp.status_code == 200
+    data = get_resp.json()
+    assert data["id"] == str(seo_issue_uuid)
+    assert data["issue_type"] == "duplicate_title"
+    assert data["severity"] == "INFO"
+    assert data["title"] == "Duplicate title tag"
+
+
+@pytest.mark.asyncio
+async def test_get_seo_issue_not_found(async_client: ClientFixture):
+    """GET /api/v1/seo-issues/{nonexistent_id} returns 404."""
+    fake_id = str(uuid.uuid4())
+    resp = await async_client.ac.get(f"/api/v1/seo-issues/{fake_id}")
+    assert resp.status_code == 404

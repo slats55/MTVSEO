@@ -32,6 +32,12 @@ def test_pages_router_import():
     assert hasattr(pages, "router")
 
 
+def test_seo_issues_router_import():
+    from services.api.routers import seo_issues
+
+    assert hasattr(seo_issues, "router")
+
+
 def test_fastapi_app_imports_with_routers():
     """FastAPI app imports cleanly after all routers are registered."""
     from services.api.main import app

@@ -156,6 +156,7 @@ async def test_router_prefixes_mounted(smoke_db):
             "/api/v1/websites/",
             "/api/v1/crawls/",
             "/api/v1/pages/",
+            "/api/v1/seo-issues/",
         ]
         for path in paths:
             r = await client.get(path)
