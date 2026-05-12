@@ -21,4 +21,8 @@ export const API_ROUTES = {
   PAGE_BY_ID: (id: string) => `/api/v1/pages/${id}`,
   PAGE_SUMMARY: (id: string) => `/api/v1/pages/summary/${id}`,
   PAGE_BY_URL: "/api/v1/pages/by-url/",
+
+  // SEO Issues
+  SEO_ISSUES: "/api/v1/seo-issues/",
+  SEO_ISSUE_BY_ID: (id: string) => `/api/v1/seo-issues/${id}`,
 } as const;
