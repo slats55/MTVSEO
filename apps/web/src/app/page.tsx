@@ -4,7 +4,10 @@ import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { useCrawls } from "@/lib/queries/useCrawls";
 import { useBusinesses } from "@/lib/queries/useBusinesses";
+import { useWebsites } from "@/lib/queries/useWebsites";
+import { useSeoIssues } from "@/lib/queries/useSeoIssues";
 import { CRAWL_STATUS_LABELS } from "@/lib/api/types/crawls";
+import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
 import { Building2 } from "lucide-react";
 import {
   Activity,
@@ -40,14 +43,6 @@ const quickActions = [
 
 
 
-const topIssues = [
-  { severity: "high", count: 3, title: "Missing meta descriptions on 12 pages", category: "On-Page SEO" },
-  { severity: "high", count: 2, title: "Duplicate title tags found", category: "On-Page SEO" },
-  { severity: "medium", count: 7, title: "Images missing alt text", category: "Images & Media" },
-  { severity: "medium", count: 4, title: "Broken internal links (404)", category: "Links" },
-  { severity: "low", count: 11, title: "H1 too long (>60 chars)", category: "Headings" },
-];
-
 const keywordOpportunities = [
   { keyword: "emergency hvac repair", volume: 2200, difficulty: 45, position: 12, change: "+3" },
   { keyword: "commercial hvac maintenance", volume: 1800, difficulty: 52, position: 24, change: "+1" },
@@ -78,6 +73,8 @@ const MOCK_CRAWLS = [
 export default function DashboardPage() {
   const { data: crawlData, isLoading: crawlLoading, isError: crawlError } = useCrawls();
   const { data: businessData, isLoading: bizLoading, isError: bizError } = useBusinesses();
+  const { data: websiteData, isLoading: siteLoading, isError: siteError } = useWebsites();
+  const { data: issueData, isLoading: issueLoading, isError: issueError } = useSeoIssues();
 
   function timeAgo(isoDate: string): string {
     const diff = Date.now() - new Date(isoDate).getTime();
@@ -215,6 +212,54 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {/* Websites */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-white">Websites</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Monitored domains</p>
+          </div>
+          <a href="/websites" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+            Manage <ArrowUpRight className="h-3 w-3" />
+          </a>
+        </div>
+        {siteLoading && (
+          <div className="flex items-center justify-center py-8">
+            <span className="text-sm text-slate-500">Loading websites...</span>
+          </div>
+        )}
+        {siteError && (
+          <div className="flex items-center justify-center py-8">
+            <span className="text-sm text-red-400">Failed to load websites</span>
+          </div>
+        )}
+        {!siteLoading && !siteError && websiteData?.items?.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            <Globe className="h-8 w-8 text-slate-600" />
+            <span className="text-sm text-slate-500">No websites yet.</span>
+            <span className="text-xs text-slate-600">Add a website from the Businesses page.</span>
+          </div>
+        )}
+        {!siteLoading && !siteError && websiteData?.items && websiteData.items.length > 0 && (
+          <div className="divide-y divide-slate-800">
+            {websiteData.items.slice(0, 4).map((site) => (
+              <div key={site.id} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-800/40 transition-colors">
+                <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-purple-900/40 text-purple-400">
+                  <Globe className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-200 truncate">
+                    {site.name ?? site.url}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">{site.url}</p>
+                </div>
+                <span className="text-xs text-slate-600 font-mono truncate max-w-[80px]">{site.business_id.slice(0, 8)}…</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Crawls */}
@@ -284,37 +329,67 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Top Issues */}
+        {/* SEO Issues */}
         <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
             <div>
-              <h2 className="text-base font-semibold text-white">Top Issues</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Priority items to fix</p>
+              <h2 className="text-base font-semibold text-white">SEO Issues</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Crawl findings</p>
             </div>
             <a href="/audits" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
               View all <ArrowUpRight className="h-3 w-3" />
             </a>
           </div>
-          <div className="divide-y divide-slate-800">
-            {topIssues.map((issue, i) => (
-              <div key={i} className="flex items-start gap-3 px-5 py-3 hover:bg-slate-800/30 transition-colors">
-                <div className="mt-0.5">
-                  {issue.severity === "high" && <AlertTriangle className="h-4 w-4 text-red-400" />}
-                  {issue.severity === "medium" && <AlertTriangle className="h-4 w-4 text-yellow-400" />}
-                  {issue.severity === "low" && <BarChart3 className="h-4 w-4 text-blue-400" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-200 leading-relaxed">{issue.title}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-slate-500">{issue.category}</span>
-                    <span className="text-xs text-slate-600">•</span>
-                    <span className="text-xs text-slate-500">{issue.count} occurrences</span>
+          {issueLoading && (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-sm text-slate-500">Loading issues...</span>
+            </div>
+          )}
+          {issueError && (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-sm text-red-400">Failed to load issues</span>
+            </div>
+          )}
+          {!issueLoading && !issueError && issueData?.items?.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 gap-2">
+              <CheckCircle2 className="h-8 w-8 text-slate-600" />
+              <span className="text-sm text-slate-500">No SEO issues found.</span>
+              <span className="text-xs text-slate-600">Run a crawl to discover issues.</span>
+            </div>
+          )}
+          {!issueLoading && !issueError && issueData?.items && issueData.items.length > 0 && (
+            <div className="divide-y divide-slate-800">
+              {issueData.items.slice(0, 4).map((issue) => (
+                <div key={issue.id} className="flex items-start gap-3 px-5 py-3 hover:bg-slate-800/30 transition-colors">
+                  <div className="mt-0.5">
+                    {issue.severity === "CRITICAL" || issue.severity === "HIGH" ? (
+                      <AlertTriangle className="h-4 w-4 text-red-400" />
+                    ) : issue.severity === "MEDIUM" ? (
+                      <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                    ) : (
+                      <BarChart3 className="h-4 w-4 text-blue-400" />
+                    )}
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-200 leading-relaxed">{issue.title}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-slate-500">{issue.issue_type}</span>
+                      {issue.page_id && (
+                        <>
+                          <span className="text-xs text-slate-600">•</span>
+                          <span className="text-xs text-slate-500 font-mono truncate max-w-[60px]">{issue.page_id.slice(0, 8)}…</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <StatusBadge
+                    status={SEVERITY_VARIANTS[issue.severity] ?? "neutral"}
+                    label={SEVERITY_LABELS[issue.severity] ?? issue.severity}
+                  />
                 </div>
-                <StatusBadge status={issue.severity === "high" ? "error" : issue.severity === "medium" ? "warning" : "info"} />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
