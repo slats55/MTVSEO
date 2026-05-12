@@ -63,12 +63,6 @@ function getStatusVariant(status: string) {
 }
 
 // Fallback mock data when API is unavailable
-const MOCK_CRAWLS = [
-  { id: "1", website_id: "mock-1", status: "COMPLETED", pages: 47, date: "2h ago" },
-  { id: "2", website_id: "mock-2", status: "COMPLETED", pages: 31, date: "1d ago" },
-  { id: "3", website_id: "mock-3", status: "FAILED", pages: 12, date: "2d ago" },
-  { id: "4", website_id: "mock-4", status: "COMPLETED", pages: 89, date: "3d ago" },
-];
 
 export default function DashboardPage() {
   const { data: crawlData, isLoading: crawlLoading, isError: crawlError } = useCrawls();
@@ -94,8 +88,7 @@ export default function DashboardPage() {
     date: crawl.started_at ? timeAgo(crawl.started_at) : timeAgo(crawl.created_at),
   })) ?? [];
 
-  const displayCrawls =
-    crawlRows.length > 0 ? crawlRows : crawlLoading ? [] : MOCK_CRAWLS;
+  const displayCrawls = crawlRows;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
