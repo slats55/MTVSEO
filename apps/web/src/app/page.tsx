@@ -1,6 +1,5 @@
 "use client";
 
-import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { useCrawls } from "@/lib/queries/useCrawls";
 import { useBusinesses } from "@/lib/queries/useBusinesses";
@@ -14,39 +13,20 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
-  ExternalLink,
   FileText,
   Globe,
   RefreshCcw,
   Search,
-  TrendingUp,
   ChevronRight,
   BarChart3,
-  LineChart,
-  Zap,
 } from "lucide-react";
 
-// Mock data — replace with API calls via React Query after CRUD stabilizes
-const metrics = [
-  { label: "Technical SEO", value: 72, max: 100, unit: "", icon: Search, grade: "C" as const, trend: { value: 3, label: "+3" } },
-  { label: "GEO / AI Visibility", value: 58, max: 100, unit: "", icon: Activity, grade: "D" as const, trend: { value: 5, label: "+5" } },
-  { label: "Content Quality", value: 81, max: 100, unit: "", icon: FileText, grade: "B" as const, trend: { value: 2, label: "+2" } },
-  { label: "Crawl Health", value: 94, max: 100, unit: "", icon: Globe, grade: "A" as const },
-];
-
+// Quick actions — static navigation links (no backend dependency)
 const quickActions = [
   { label: "New Crawl", icon: RefreshCcw, href: "/businesses", description: "Crawl a website" },
   { label: "Run SEO Audit", icon: Search, href: "/audits", description: "Technical analysis" },
   { label: "Run GEO Audit", icon: Activity, href: "/audits", description: "AI visibility check" },
   { label: "Generate Report", icon: FileText, href: "/reports", description: "Export findings" },
-];
-
-
-
-const keywordOpportunities = [
-  { keyword: "emergency hvac repair", volume: 2200, difficulty: 45, position: 12, change: "+3" },
-  { keyword: "commercial hvac maintenance", volume: 1800, difficulty: 52, position: 24, change: "+1" },
-  { keyword: "geothermal heating", volume: 950, difficulty: 38, position: 8, change: "+5" },
 ];
 
 function getStatusVariant(status: string) {
@@ -107,22 +87,6 @@ export default function DashboardPage() {
           </button>
           <span className="text-xs text-slate-500">Last sync: 5 min ago</span>
         </div>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((m) => (
-          <MetricCard
-            key={m.label}
-            label={m.label}
-            value={m.value}
-            max={m.max}
-            unit={m.unit}
-            icon={m.icon}
-            grade={m.grade}
-            trend={m.trend}
-          />
-        ))}
       </div>
 
       {/* Quick Actions */}
@@ -384,57 +348,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Keyword Opportunities */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-          <div>
-            <h2 className="text-base font-semibold text-white">Keyword Opportunities</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Quick wins from recent analysis</p>
-          </div>
-          <a href="/audits" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
-            View keywords <ArrowUpRight className="h-3 w-3" />
-          </a>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-800 text-left text-slate-500">
-                <th className="px-5 py-3 font-medium">Keyword</th>
-                <th className="px-5 py-3 font-medium">Vol.</th>
-                <th className="px-5 py-3 font-medium">Difficulty</th>
-                <th className="px-5 py-3 font-medium">Pos.</th>
-                <th className="px-5 py-3 font-medium">Change</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800">
-              {keywordOpportunities.map((kw, i) => (
-                <tr key={i} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="px-5 py-3 text-slate-200 font-medium">{kw.keyword}</td>
-                  <td className="px-5 py-3 text-slate-300">{kw.volume.toLocaleString()}</td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-16 rounded-full bg-slate-800">
-                        <div
-                          className={`h-1.5 rounded-full ${
-                            kw.difficulty < 40 ? "bg-green-500" :
-                            kw.difficulty < 60 ? "bg-yellow-500" : "bg-red-500"
-                          }`}
-                          style={{ width: `${kw.difficulty}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-slate-400">{kw.difficulty}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-slate-300">{kw.position}</td>
-                  <td className="px-5 py-3">
-                    <span className="text-sm font-semibold text-green-400">{kw.change}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* End of dashboard panels */}
     </div>
   );
 }
