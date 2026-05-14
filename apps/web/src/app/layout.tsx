@@ -48,7 +48,7 @@ export default function RootLayout({
             {/* Business selector */}
             <button className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 transition-colors">
               <Building2 className="h-3.5 w-3.5" />
-              MTV Tech Solutions
+              <span id="layout-business-name">All Businesses</span>
               <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
             </button>
             <button className="rounded-md p-1.5 text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors">
