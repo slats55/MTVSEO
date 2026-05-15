@@ -75,7 +75,9 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-sm text-slate-400 mt-1">
-            Overview for <span className="text-blue-400 font-medium">MTV Tech Solutions</span>
+            {businessData?.items && businessData.items.length > 0
+              ? <>Overview for <span className="text-blue-400 font-medium">{businessData.items[0].name}</span></>
+              : "SEO Dashboard Overview"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -85,7 +87,6 @@ export default function DashboardPage() {
             </svg>
             Refresh
           </button>
-          <span className="text-xs text-slate-500">Last sync: 5 min ago</span>
         </div>
       </div>
 
