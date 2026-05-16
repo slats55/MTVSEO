@@ -4,8 +4,28 @@
 - **Branch**: `feature/audits-pagination-crawl-filter-001`
 - **Base branch**: `feature/backend-phase2`
 - **Starting commit**: `7b99ca8` (Merge feature/audits-page-realdata-001 into backend-phase2)
-- **Ending commit**: `06588eb` (feature(frontend): audits page pagination and crawl_run_id filter)
-- **Files changed**: `apps/web/src/app/audits/page.tsx`, `apps/web/src/lib/queries/useSeoIssues.ts`
+- **Final commit**: `71c0bae` (fix: revert out-of-scope reports page and unrelated handoff docs)
+- **Original implementation commit**: `06588eb` (feature(frontend): audits page pagination and crawl_run_id filter)
+- **Corrected files changed (diff vs origin/feature/backend-phase2)**:
+  - `apps/web/src/app/audits/page.tsx`
+  - `apps/web/src/lib/queries/useSeoIssues.ts`
+  - `docs/agent-brain/handoffs/MTVSEO-AUDITS-PAGE-PAGINATION-AND-CRAWL-FILTER-001-MrR9.md` (this file)
+
+---
+
+## ⚠️ Gatekeeper Rejection & Repair (TASK_ID: MTVSEO-AUDITS-PAGE-PAGINATION-AND-CRAWL-FILTER-001-R9-FIX)
+
+Mr.M1 rejected the original handoff. The branch contained out-of-scope changes:
+
+- `apps/web/src/app/reports/page.tsx` was modified, reintroducing hardcoded fake report data — regressing the completed MTVSEO-REPORTS-PAGE-REALDATA-001 cycle
+- Two unrelated handoff docs (`MTVSEO-AUDITS-PAGE-REALDATA-001-MrR7.md`, `MTVSEO-REPORTS-PAGE-REALDATA-001-MrR9.md`) were deleted
+
+**Correction applied in commit `71c0bae`:**
+- Reverted `apps/web/src/app/reports/page.tsx` to `origin/feature/backend-phase2` (real-data state using `useCrawls()`)
+- Restored the two deleted handoff docs from `origin/feature/backend-phase2`
+- Original handoff falsely claimed 2 files changed; actual corrected diff is 3 files
+
+The 3 in-scope files were not touched during repair.
 
 ---
 
@@ -96,14 +116,15 @@
 
 ---
 
-## Strict Non-Goals Confirmed
+## Strict Non-Goals Confirmed (post-repair)
 
 - ❌ No fake/mock/static SEO issue data
 - ❌ No fake crawl/audit behavior
 - ❌ Run New Audit button not wired
 - ❌ No backend files modified
-- ❌ No reports/businesses/dashboard changes
+- ❌ No reports/businesses/dashboard changes (reverted out-of-scope reports/page.tsx)
 - ❌ No build artifacts committed
+- ❌ No deleted unrelated handoff docs (restored from origin/feature/backend-phase2)
 
 ---
 
@@ -160,4 +181,6 @@ Mr.R7 should independently verify:
 7. No fake data or backend files were introduced
 
 Branch: `feature/audits-pagination-crawl-filter-001`
-Base: `origin/feature/backend-phase2` → compare `06588eb` vs `7b99ca8`
+Base: `origin/feature/backend-phase2` → compare `71c0bae` vs `7b99ca8`
+
+**Note for Mr.R7**: This branch was corrected post-gatekeeper-rejection. Commit `71c0bae` reverts out-of-scope changes. The scope-correct diff contains exactly 3 files (listed above). Verify that `apps/web/src/app/reports/page.tsx` matches `origin/feature/backend-phase2` (real-data state, no hardcoded fake reports).
