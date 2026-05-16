@@ -3,10 +3,12 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSeoIssues } from "@/lib/queries/useSeoIssues";
+import { useWebsites } from "@/lib/queries/useWebsites";
+import { useCreateCrawl } from "@/lib/queries/useCrawls";
 import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
-import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown, PlayCircle } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
-import { Loader2 } from "lucide-react";
+import { Loader2 as Spinner } from "lucide-react";
 
 const severities = ["all", "critical", "high", "medium", "low", "info"] as const;
 type SeverityFilter = typeof severities[number];
@@ -29,12 +31,17 @@ function AuditsContent() {
 
   const [skip, setSkip] = useState(0);
   const [activeSeverity, setActiveSeverity] = useState<SeverityFilter>("all");
+  const [selectedWebsiteId, setSelectedWebsiteId] = useState<string>("");
+  const [auditFeedback, setAuditFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
+  const { data: websitesData, isLoading: websitesLoading } = useWebsites();
   const { data, isLoading, isError } = useSeoIssues({
     crawlRunId,
     skip,
     limit: PAGE_SIZE,
   });
+
+  const createCrawl = useCreateCrawl();
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -59,6 +66,29 @@ function AuditsContent() {
     setSkip(0);
   }
 
+  function handleRunAudit() {
+    if (!selectedWebsiteId) {
+      setAuditFeedback({ type: "error", message: "Please select a website first." });
+      return;
+    }
+    setAuditFeedback(null);
+    createCrawl.mutate(
+      { website_id: selectedWebsiteId },
+      {
+        onSuccess: () => {
+          setAuditFeedback({ type: "success", message: "Audit queued for selected website. Results will appear after processing." });
+        },
+        onError: (err) => {
+          setAuditFeedback({ type: "error", message: `Audit request failed: ${err.message}` });
+        },
+      }
+    );
+  }
+
+  const websites = websitesData?.items ?? [];
+  const noWebsites = websites.length === 0;
+  const isCreating = createCrawl.isPending;
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -74,13 +104,57 @@ function AuditsContent() {
             )}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
-            <FileSearch className="h-4 w-4" />
-            Run New Audit
+        <div className="flex gap-2 items-center">
+          {websitesLoading ? (
+            <span className="text-xs text-slate-500">Loading websites...</span>
+          ) : noWebsites ? (
+            <span className="text-xs text-slate-500">No websites available. Add a website first.</span>
+          ) : (
+            <select
+              value={selectedWebsiteId}
+              onChange={(e) => setSelectedWebsiteId(e.target.value)}
+              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300"
+            >
+              <option value="">Select website</option>
+              {websites.map((ws) => (
+                <option key={ws.id} value={ws.id}>
+                  {ws.url}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            onClick={handleRunAudit}
+            disabled={!selectedWebsiteId || isCreating || noWebsites}
+            className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isCreating ? (
+              <>
+                <Spinner className="h-4 w-4 animate-spin" />
+                Queuing...
+              </>
+            ) : (
+              <>
+                <PlayCircle className="h-4 w-4" />
+                Run New Audit
+              </>
+            )}
           </button>
         </div>
       </div>
+
+      {/* Feedback banner */}
+      {auditFeedback && (
+        <div
+          className={`rounded-lg border px-4 py-3 text-sm ${
+            auditFeedback.type === "success"
+              ? "border-emerald-800 bg-emerald-950 text-emerald-300"
+              : "border-red-800 bg-red-950 text-red-300"
+          }`}
+        >
+          {auditFeedback.message}
+        </div>
+      )}
 
       {/* Issue breakdown */}
       {isLoading && (
@@ -167,7 +241,7 @@ function AuditsContent() {
         </div>
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-slate-500 mr-2" />
+            <Spinner className="h-5 w-5 animate-spin text-slate-500 mr-2" />
             <span className="text-sm text-slate-500">Loading issues...</span>
           </div>
         )}
