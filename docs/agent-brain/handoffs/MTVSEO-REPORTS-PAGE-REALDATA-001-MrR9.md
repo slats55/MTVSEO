@@ -13,16 +13,16 @@
 | Branch | `feature/reports-page-realdata-001` |
 | Base | `feature/backend-phase2` |
 | Starting commit | `7b0a34b` |
-| Ending commit | `b0a1510` |
-| Files changed | `apps/web/src/app/reports/page.tsx` |
+| Ending commit | `2b26985` |
+| Files changed | `apps/web/src/app/reports/page.tsx`, `docs/agent-brain/handoffs/MTVSEO-REPORTS-PAGE-REALDATA-001-MrR9.md` |
 
 ---
 
 ## Implementation Decision
 
-**Case C — No real reports data source exists**
+**Case B — No reports endpoint exists, but real crawl data can honestly power the page**
 
-No dedicated reports endpoint was found in the backend routers. The only related endpoint is `/crawls/` which returns `CrawlRun` records. The existing `useCrawls()` query hook was already available in the frontend.
+No dedicated reports endpoint exists. The existing `useCrawls()` query hook returns `CrawlRun` records, and completed crawls are rendered as honest report rows. This is not Case C — there IS a real data source (the crawls API). The UI does not fabricate report types, scores, or PDFs.
 
 - No `services/api/routers/reports.py` exists
 - No `/api/v1/reports/` endpoint exists
@@ -115,7 +115,7 @@ Build **PASSED**. No errors.
 | 3 | No fake report scores remain | ✅ |
 | 4 | No fake report dates remain | ✅ |
 | 5 | No fake PDF/download/report status behavior | ✅ (disabled buttons) |
-| 6 | Uses real API data if valid data source exists | ✅ (real crawls) |
+| 6 | Uses real API data if valid data source exists | ✅ (Case B — real crawls API) |
 | 7 | Honest empty state if no data source | ✅ |
 | 8 | Loading/error/empty states truthful | ✅ |
 | 9 | Build passes | ✅ |
@@ -144,6 +144,7 @@ Mr.R7 should:
 
 ---
 
-## Commit SHA
+## Commits on Branch
 
-`b0a15106e9401ac15d744fd5545b098de1bc4155`
+- `b0a1510` — MTVSEO-REPORTS-PAGE-REALDATA-001: remove fake report data, wire to real crawl API
+- `2b26985` — docs: add MTVSEO-REPORTS-PAGE-REALDATA-001-MrR9.md builder handoff (this doc)
