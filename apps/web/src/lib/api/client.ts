@@ -40,4 +40,15 @@ export async function apiGet<T>(path: string): Promise<T> {
 }
 
 // Export BASE_URL for use in type-safe route construction
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const url = normalizeUrl(path);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  return handleResponse<T>(res);
+}
+
 export { BASE_URL };
