@@ -92,6 +92,32 @@ def _update_crawl_run_db(
         logger.warning("Could not update CrawlRun %s in DB: %s", crawl_run_id, exc)
 
 
+def _mark_crawl_running(crawl_run_id: UUID) -> None:
+    """Mark a CrawlRun as RUNNING with current timestamp. Called when worker starts."""
+    try:
+        from services.api.database import async_session_maker
+        from services.api.models.crawl_run import CrawlRun
+        from services.api.models.enums import CrawlStatus
+
+        async def _mark() -> None:
+            async with async_session_maker() as session:
+                from sqlalchemy import update
+                stmt = (
+                    update(CrawlRun)
+                    .where(CrawlRun.id == crawl_run_id)
+                    .values(
+                        status=CrawlStatus.RUNNING,
+                        started_at=datetime.now(timezone.utc),
+                    )
+                )
+                await session.execute(stmt)
+                await session.commit()
+
+        asyncio.run(_mark())
+    except Exception as exc:
+        logger.warning("Could not mark CrawlRun %s as RUNNING: %s", crawl_run_id, exc)
+
+
 def _upsert_pages_db(crawl_run_id: UUID, summary: CrawlSummary, pages: list, config: CrawlConfig) -> None:
     """Upsert Page records into DB. Skipped when DB is not available."""
     try:
@@ -171,6 +197,11 @@ if _celerity_available:
         import asyncio
 
         async def _run() -> dict:
+            run_uuid = UUID(crawl_run_id)
+
+            # Mark crawl as RUNNING immediately when worker starts
+            _mark_crawl_running(run_uuid)
+
             config = CrawlConfig(
                 start_url=start_url,
                 max_pages=max_pages,
@@ -186,7 +217,7 @@ if _celerity_available:
 
             # Update CrawlRun in DB
             _update_crawl_run_db(
-                crawl_run_id=UUID(crawl_run_id),
+                crawl_run_id=run_uuid,
                 status="COMPLETED" if result.success else "FAILED",
                 started_at=result.started_at,
                 completed_at=result.completed_at,
@@ -196,7 +227,7 @@ if _celerity_available:
             )
 
             # Upsert pages
-            _upsert_pages_db(UUID(crawl_run_id), summary, result.pages, config)
+            _upsert_pages_db(run_uuid, summary, result.pages, config)
 
             return {
                 "crawl_run_id": crawl_run_id,

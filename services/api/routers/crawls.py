@@ -72,8 +72,8 @@ async def trigger_crawl(
     """
     Trigger a new crawl for a website.
 
-    Creates a CrawlRun record with status=PENDING.
-    The actual crawling is handled asynchronously by the Celery worker.
+    Creates a CrawlRun record with status=PENDING, then dispatches
+    the Celery crawl worker to execute asynchronously.
     """
     # Verify website exists
     website = await db.get(Website, data.website_id)
@@ -91,10 +91,40 @@ async def trigger_crawl(
     )
     db.add(crawl_run)
     await db.flush()
-    logger.info(
-        "Crawl run created, queuing worker",
-        extra={"crawl_run_id": str(crawl_run.id), "website_id": str(data.website_id)},
-    )
+
+    # Commit the CrawlRun first so worker can read it
+    await db.commit()
+    await db.refresh(crawl_run)
+
+    # Dispatch the Celery task (best-effort — log but don't fail the HTTP response)
+    try:
+        # Import here to avoid circular import; lazy so Celery is only loaded when needed
+        from services.api.celery_app import celery_app
+        from packages.crawler.crawl_worker import crawl_website_task
+
+        task = crawl_website_task.delay(
+            crawl_run_id=str(crawl_run.id),
+            start_url=website.url,
+            max_pages=data.max_pages,
+            crawl_depth=data.crawl_depth,
+            respect_robots=data.respect_robots,
+        )
+        logger.info(
+            "Crawl worker dispatched",
+            extra={
+                "crawl_run_id": str(crawl_run.id),
+                "website_id": str(data.website_id),
+                "celery_task_id": task.id,
+            },
+        )
+    except Exception as exc:
+        # Don't fail the HTTP response — crawl is saved; worker can be re-triggered
+        logger.warning(
+            "Failed to dispatch crawl worker for CrawlRun %s: %s",
+            str(crawl_run.id),
+            exc,
+        )
+
     return crawl_run
 
 
