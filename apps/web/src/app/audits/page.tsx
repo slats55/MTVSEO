@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSeoIssues } from "@/lib/queries/useSeoIssues";
 import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
 import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { Loader2 } from "lucide-react";
 
 const severities = ["all", "critical", "high", "medium", "low", "info"] as const;
 type SeverityFilter = typeof severities[number];
+
+const PAGE_SIZE = 20;
 
 function timeAgo(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -19,14 +23,23 @@ function timeAgo(isoDate: string): string {
   return `${days}d ago`;
 }
 
-export default function AuditsPage() {
+function AuditsContent() {
+  const searchParams = useSearchParams();
+  const crawlRunId = searchParams.get("crawl_run_id") ?? undefined;
+
+  const [skip, setSkip] = useState(0);
   const [activeSeverity, setActiveSeverity] = useState<SeverityFilter>("all");
-  const { data, isLoading, isError } = useSeoIssues();
+
+  const { data, isLoading, isError } = useSeoIssues({
+    crawlRunId,
+    skip,
+    limit: PAGE_SIZE,
+  });
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasMore = skip + items.length < total;
 
-  // Compute severity counts from real data
   const severityCounts = items.reduce<Record<string, number>>((acc, issue) => {
     const key = issue.severity.toLowerCase();
     acc[key] = (acc[key] ?? 0) + 1;
@@ -36,6 +49,15 @@ export default function AuditsPage() {
   const filtered = activeSeverity === "all"
     ? items
     : items.filter((i) => i.severity.toLowerCase() === activeSeverity);
+
+  function handleLoadMore() {
+    setSkip((s) => s + PAGE_SIZE);
+  }
+
+  function handleSeverityChange(sev: SeverityFilter) {
+    setActiveSeverity(sev);
+    setSkip(0);
+  }
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -47,6 +69,9 @@ export default function AuditsPage() {
             {total > 0
               ? `${total} issue${total !== 1 ? "s" : ""} found`
               : "SEO issue overview"}
+            {crawlRunId && (
+              <span className="ml-2 text-slate-500 text-xs">filtered by crawl</span>
+            )}
           </p>
         </div>
         <div className="flex gap-2">
@@ -57,7 +82,7 @@ export default function AuditsPage() {
         </div>
       </div>
 
-      {/* Issue breakdown — computed from real data, no fake scores */}
+      {/* Issue breakdown */}
       {isLoading && (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
           {severities.slice(1).map((sev) => (
@@ -108,7 +133,7 @@ export default function AuditsPage() {
         {severities.map((sev) => (
           <button
             key={sev}
-            onClick={() => setActiveSeverity(sev)}
+            onClick={() => handleSeverityChange(sev)}
             className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
               activeSeverity === sev
                 ? sev === "critical" ? "bg-red-900 text-red-400 border border-red-700"
@@ -127,13 +152,22 @@ export default function AuditsPage() {
 
       {/* Issues table */}
       <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-        <div className="border-b border-slate-800 px-5 py-4">
+        <div className="border-b border-slate-800 px-5 py-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-white">
-            Issues ({filtered.length})
+            Issues ({filtered.length}{total > PAGE_SIZE ? ` of ${total}` : ""})
           </h2>
+          {hasMore && (
+            <button
+              onClick={handleLoadMore}
+              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+            >
+              Load more
+            </button>
+          )}
         </div>
         {isLoading && (
           <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-slate-500 mr-2" />
             <span className="text-sm text-slate-500">Loading issues...</span>
           </div>
         )}
@@ -195,7 +229,67 @@ export default function AuditsPage() {
             ))}
           </div>
         )}
+        {/* Pagination footer */}
+        {!isLoading && !isError && total > PAGE_SIZE && (
+          <div className="border-t border-slate-800 px-5 py-3 flex items-center justify-between">
+            <span className="text-xs text-slate-500">
+              Showing {skip + 1}–{Math.min(skip + PAGE_SIZE, total)} of {total}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSkip(0)}
+                disabled={skip === 0}
+                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                First
+              </button>
+              <button
+                onClick={() => setSkip((s) => Math.max(0, s - PAGE_SIZE))}
+                disabled={skip === 0}
+                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleLoadMore}
+                disabled={!hasMore}
+                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function AuditsLoading() {
+  return (
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="h-7 w-64 bg-slate-800 rounded animate-pulse" />
+          <div className="h-4 w-40 bg-slate-800 rounded animate-pulse mt-2" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="rounded-lg border border-slate-800 bg-slate-900 p-3 animate-pulse">
+            <div className="h-3 bg-slate-800 rounded w-2/3 mb-2" />
+            <div className="h-1 bg-slate-800 rounded w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function AuditsPage() {
+  return (
+    <Suspense fallback={<AuditsLoading />}>
+      <AuditsContent />
+    </Suspense>
   );
 }
