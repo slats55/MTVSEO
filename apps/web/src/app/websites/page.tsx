@@ -1,6 +1,7 @@
 "use client";
 
-import { Globe, Plus, Search, ExternalLink, Loader2, AlertCircle, Inbox } from "lucide-react";
+import { Globe, Plus, Search, ExternalLink, Loader2, AlertCircle, Inbox, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { useWebsites } from "@/lib/queries/useWebsites";
 
 function timeAgo(isoDate: string): string {
@@ -106,11 +107,12 @@ export default function WebsitesPage() {
         />
       </div>
 
-      {/* Website list */}
+{/* Website list */}
       <div className="space-y-3">
         {websites.map((site) => (
-          <div
+          <Link
             key={site.id}
+            href={`/websites/${site.id}`}
             className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-slate-700 hover:bg-slate-800/50 transition-all"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800">
@@ -123,6 +125,7 @@ export default function WebsitesPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-slate-500 flex items-center gap-1 hover:text-blue-400 transition-colors truncate"
+                onClick={(e) => e.stopPropagation()}
               >
                 {site.url}
                 <ExternalLink className="h-3 w-3 flex-shrink-0" />
@@ -140,7 +143,8 @@ export default function WebsitesPage() {
               <p className="text-xs text-slate-500">Business ID</p>
               <p className="text-xs text-slate-600 font-mono">{site.business_id.slice(0, 8)}</p>
             </div>
-          </div>
+            <ChevronRight className="h-4 w-4 text-slate-600 flex-shrink-0" />
+          </Link>
         ))}
       </div>
     </div>

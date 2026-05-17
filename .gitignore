@@ -7,12 +7,13 @@ __pycache__/
 *.so
 .Python
 build/
+build/lib/
+build/lib64/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -29,25 +30,9 @@ venv/
 ENV/
 env/
 
-# PyCharm
-.idea/
-
-# VS Code
-.vscode/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Ruff
-.ruff_cache/
+# Python lib/ — be specific to avoid matching apps/web/src/lib
+# (apps/web/src/lib is TypeScript, not Python packages)
+.lib/
 
 # =============================================================================
 # Node / npm (apps/web)
