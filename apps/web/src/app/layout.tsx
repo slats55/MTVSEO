@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   Building2,
+  Globe,
   FileSearch,
   FileText,
   Settings,
@@ -15,6 +16,7 @@ import { Providers } from "./providers";
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/businesses", icon: Building2, label: "Businesses" },
+  { href: "/websites", icon: Globe, label: "Websites" },
   { href: "/audits", icon: FileSearch, label: "Audits" },
   { href: "/reports", icon: FileText, label: "Reports" },
 ];
