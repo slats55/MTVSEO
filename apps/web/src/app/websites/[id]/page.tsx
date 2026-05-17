@@ -2,8 +2,20 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { Globe, ArrowLeft, Loader2, AlertCircle, Calendar, ExternalLink } from "lucide-react";
+import {
+  Globe,
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  Calendar,
+  ExternalLink,
+  Inbox,
+  Activity,
+} from "lucide-react";
 import { useWebsite } from "@/lib/queries/useWebsite";
+import { useWebsiteCrawls } from "@/lib/queries/useWebsiteCrawls";
+import { CRAWL_STATUS_LABELS, CRAWL_STATUS_VARIANTS } from "@/lib/api/types/crawls";
+import { StatusBadge } from "@/components/status-badge";
 import type { Website } from "@/lib/api/types/websites";
 
 function formatDate(isoDate: string): string {
@@ -16,13 +28,24 @@ function formatDate(isoDate: string): string {
   });
 }
 
+function timeAgo(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
 export default function WebsiteDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data, isLoading, isError } = useWebsite(id);
+  const { data: website, isLoading, isError } = useWebsite(id);
 
   if (isLoading) {
     return (
@@ -66,7 +89,7 @@ export default function WebsiteDetailPage({
   }
 
   // This should never happen: loading and error are handled above
-  if (!data) {
+  if (!website) {
     return (
       <div className="p-6 space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center gap-3">
@@ -85,8 +108,6 @@ export default function WebsiteDetailPage({
       </div>
     );
   }
-
-  const website: Website = data;
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
@@ -172,17 +193,116 @@ export default function WebsiteDetailPage({
         </table>
       </div>
 
-      {/* Related crawls note */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-        <p className="text-sm text-slate-500">
-          Related crawl runs are accessible via{" "}
-          <code className="text-slate-400 text-xs bg-slate-800 px-1.5 py-0.5 rounded">
-            GET /api/v1/crawls/?website_id={id.slice(0, 8)}...
-          </code>
-          . No crawl history is displayed here as no dedicated endpoint or hook exists for
-          website-associated crawls on the detail page.
-        </p>
+      {/* Crawl History Section */}
+      <CrawlHistorySection websiteId={id} />
+    </div>
+  );
+}
+
+function CrawlHistorySection({ websiteId }: { websiteId: string }) {
+  const { data, isLoading, isError } = useWebsiteCrawls(websiteId);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="h-4 w-4 text-slate-400" />
+          <h2 className="text-base font-semibold text-white">Crawl History</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-5 w-5 text-slate-500 animate-spin" />
+          <span className="ml-2 text-sm text-slate-500">Loading crawl history...</span>
+        </div>
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="h-4 w-4 text-slate-400" />
+          <h2 className="text-base font-semibold text-white">Crawl History</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 gap-2 rounded-lg border border-red-900/30 bg-red-950/10">
+          <AlertCircle className="h-5 w-5 text-red-400" />
+          <p className="text-sm text-red-400">Failed to load crawl history.</p>
+          <p className="text-xs text-slate-600">Check that the backend is running.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const crawls = data?.items ?? [];
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Activity className="h-4 w-4 text-slate-400" />
+        <h2 className="text-base font-semibold text-white">Crawl History</h2>
+        {data && (
+          <span className="text-xs text-slate-500 ml-auto">{data.total} total</span>
+        )}
+      </div>
+
+      {crawls.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 gap-2 rounded-lg border border-slate-800">
+          <Inbox className="h-8 w-8 text-slate-700" />
+          <p className="text-sm text-slate-400 font-medium">No crawl runs found for this website yet.</p>
+          <p className="text-xs text-slate-600 text-center max-w-xs">
+            Trigger a crawl from the Audits page to see history here.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {crawls.map((crawl) => (
+            <div
+              key={crawl.id}
+              className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/30 px-4 py-3"
+            >
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-mono text-slate-400 text-xs truncate">
+                    {crawl.id.slice(0, 8)}...
+                  </span>
+                  <StatusBadge
+                    status={CRAWL_STATUS_VARIANTS[crawl.status]}
+                    label={CRAWL_STATUS_LABELS[crawl.status]}
+                  />
+                </div>
+                <div className="flex items-center gap-3 text-xs text-slate-500">
+                  <span title={formatDate(crawl.created_at)}>
+                    {timeAgo(crawl.created_at)}
+                  </span>
+                  {crawl.started_at && (
+                    <span>
+                      Started {timeAgo(crawl.started_at)}
+                    </span>
+                  )}
+                  {crawl.pages_crawled > 0 && (
+                    <span>{crawl.pages_crawled} pages crawled</span>
+                  )}
+                  {crawl.pages_discovered > 0 && (
+                    <span>{crawl.pages_discovered} discovered</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {crawl.error_message && (
+                  <span className="text-xs text-red-400 max-w-[200px] truncate" title={crawl.error_message}>
+                    {crawl.error_message}
+                  </span>
+                )}
+                {crawl.completed_at && (
+                  <span className="text-xs text-slate-600">
+                    Done {timeAgo(crawl.completed_at)}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
