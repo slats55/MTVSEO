@@ -17,8 +17,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCrawl } from "@/lib/queries/useCrawls";
+import { useSeoIssues } from "@/lib/queries/useSeoIssues";
+import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
 import { CRAWL_STATUS_LABELS, CRAWL_STATUS_VARIANTS } from "@/lib/api/types/crawls";
 import { StatusBadge } from "@/components/status-badge";
+import { AlertTriangle } from "lucide-react";
 
 function formatDate(isoDate: string): string {
   return new Date(isoDate).toLocaleDateString("en-US", {
@@ -252,6 +255,96 @@ export default function CrawlDetailPage({
           Back to website
         </Link>
       </div>
+
+      {/* Related SEO Issues */}
+      <SeoIssuesSection crawlId={crawl.id} websiteId={crawl.website_id} />
+    </div>
+  );
+}
+
+function SeoIssuesSection({ crawlId, websiteId }: { crawlId: string; websiteId: string }) {
+  const { data, isLoading, isError } = useSeoIssues({ crawlRunId: crawlId, limit: 50 });
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <AlertTriangle className="h-4 w-4 text-slate-400" />
+          <h2 className="text-base font-semibold text-white">SEO Issues</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-5 w-5 text-slate-500 animate-spin" />
+          <span className="ml-2 text-sm text-slate-500">Loading SEO issues...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <AlertTriangle className="h-4 w-4 text-slate-400" />
+          <h2 className="text-base font-semibold text-white">SEO Issues</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 gap-2 rounded-lg border border-red-900/30 bg-red-950/10">
+          <AlertCircle className="h-5 w-5 text-red-400" />
+          <p className="text-sm text-red-400">Failed to load SEO issues.</p>
+          <p className="text-xs text-slate-600">Check that the backend is running.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const issues = data?.items ?? [];
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <AlertTriangle className="h-4 w-4 text-slate-400" />
+        <h2 className="text-base font-semibold text-white">SEO Issues</h2>
+        {data && (
+          <span className="text-xs text-slate-500 ml-auto">{data.total} total</span>
+        )}
+      </div>
+
+      {issues.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 gap-2 rounded-lg border border-slate-800">
+          <Inbox className="h-8 w-8 text-slate-700" />
+          <p className="text-sm text-slate-400 font-medium">No SEO issues found for this crawl run.</p>
+          <p className="text-xs text-slate-600 text-center max-w-xs">
+            No issues were detected in this crawl run.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {issues.map((issue) => (
+            <div
+              key={issue.id}
+              className="flex items-start justify-between rounded-lg border border-slate-800 bg-slate-800/30 px-4 py-3 gap-4"
+            >
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-200 truncate">
+                    {issue.title}
+                  </span>
+                  <StatusBadge
+                    status={SEVERITY_VARIANTS[issue.severity]}
+                    label={SEVERITY_LABELS[issue.severity]}
+                  />
+                </div>
+                {issue.description && (
+                  <p className="text-xs text-slate-500 line-clamp-2">{issue.description}</p>
+                )}
+                <div className="flex items-center gap-3 text-xs text-slate-600">
+                  <span className="font-mono text-slate-600">{issue.issue_type}</span>
+                  <span>{timeAgo(issue.created_at)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
