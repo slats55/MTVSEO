@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSeoIssues } from "@/lib/queries/useSeoIssues";
 import { useWebsites } from "@/lib/queries/useWebsites";
 import { useCreateCrawl } from "@/lib/queries/useCrawls";
 import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
-import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown, PlayCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown, PlayCircle, ExternalLink } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { Loader2 as Spinner } from "lucide-react";
 
@@ -267,7 +268,12 @@ function AuditsContent() {
         )}
         {!isLoading && !isError && filtered.length > 0 && (
           <div className="divide-y divide-slate-800">
-            {filtered.map((issue) => (
+            {filtered.map((issue) => {
+              const hasWebsite = !!issue.website_id && issue.website_id !== "00000000-0000-0000-0000-000000000000";
+              const hasCrawl = !!issue.crawl_run_id;
+              const linkToWebsite = hasWebsite ? `/websites/${issue.website_id}` : null;
+              const linkToCrawl = hasCrawl ? `/crawls/${issue.crawl_run_id}` : null;
+              return (
               <div key={issue.id} className="flex items-start gap-4 px-5 py-4 hover:bg-slate-800/30 transition-colors">
                 <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                   issue.severity === "CRITICAL" ? "bg-red-900/70 text-red-400" :
@@ -299,8 +305,33 @@ function AuditsContent() {
                     {timeAgo(issue.created_at)}
                   </span>
                 )}
+                {(linkToWebsite || linkToCrawl) && (
+                  <div className="shrink-0 flex items-center gap-1">
+                    {linkToWebsite && (
+                      <Link
+                        href={linkToWebsite}
+                        className="inline-flex items-center gap-1 rounded bg-blue-900/40 px-2 py-0.5 text-xs text-blue-400 hover:bg-blue-900/60 transition-colors"
+                        title="View website"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Website
+                      </Link>
+                    )}
+                    {linkToCrawl && (
+                      <Link
+                        href={linkToCrawl}
+                        className="inline-flex items-center gap-1 rounded bg-purple-900/40 px-2 py-0.5 text-xs text-purple-400 hover:bg-purple-900/60 transition-colors"
+                        title="View crawl"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Crawl
+                      </Link>
+                    )}
+                  </div>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
         {/* Pagination footer */}
