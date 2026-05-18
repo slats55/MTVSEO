@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCrawls } from "@/lib/queries/useCrawls";
 import { CRAWL_STATUS_LABELS, CRAWL_STATUS_VARIANTS } from "@/lib/api/types/crawls";
 import { FileText, Download, Eye, Calendar, TrendingUp, Loader2, AlertCircle, Inbox } from "lucide-react";
@@ -135,7 +136,14 @@ export default function ReportsPage() {
                   </button>
                 </div>
               </div>
-              <h3 className="font-semibold text-white mb-1">Crawl Report — {crawl.website_id.slice(0, 8)}</h3>
+              <h3 className="font-semibold text-white mb-1">
+                <Link
+                  href={`/crawls/${crawl.id}`}
+                  className="hover:text-blue-400 transition-colors focus:outline-none focus:underline"
+                >
+                  Crawl Report — {crawl.website_id.slice(0, 8)}
+                </Link>
+              </h3>
               <p className="text-xs text-slate-500 font-mono mb-3">{crawl.website_id}</p>
               <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
                 {crawl.completed_at && (
