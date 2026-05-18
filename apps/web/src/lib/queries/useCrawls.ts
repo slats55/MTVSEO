@@ -34,3 +34,11 @@ export function useCreateCrawl() {
     },
   });
 }
+
+export function useCrawl(crawlId: string) {
+  return useQuery<CrawlRun, ApiError>({
+    queryKey: ["crawls", crawlId],
+    queryFn: () => apiGet<CrawlRun>(API_ROUTES.CRAWL_BY_ID(crawlId)),
+    enabled: Boolean(crawlId),
+  });
+}

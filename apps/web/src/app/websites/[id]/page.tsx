@@ -262,9 +262,10 @@ function CrawlHistorySection({ websiteId }: { websiteId: string }) {
       ) : (
         <div className="space-y-2">
           {crawls.map((crawl) => (
-            <div
+            <Link
               key={crawl.id}
-              className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/30 px-4 py-3"
+              href={`/crawls/${crawl.id}`}
+              className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/30 px-4 py-3 hover:border-slate-600 transition-colors"
             >
               <div className="flex flex-col gap-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -305,7 +306,7 @@ function CrawlHistorySection({ websiteId }: { websiteId: string }) {
                   </span>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
