@@ -58,10 +58,9 @@ export default function BusinessesPage() {
 
         {!isLoading && !isError && data?.items && data.items.length > 0 && (
           data.items.map((biz) => (
-            <a
+            <div
               key={biz.id}
-              href={`/businesses/${biz.id}`}
-              className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-slate-700 hover:bg-slate-800/50 transition-all"
+              className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 transition-all"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800">
                 <Building2 className="h-5 w-5 text-slate-400" />
@@ -93,8 +92,7 @@ export default function BusinessesPage() {
                 <p className="text-xs text-slate-500">Last Crawl</p>
                 <p className="text-sm text-slate-600">—</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-600" />
-            </a>
+            </div>
           ))
         )}
       </div>

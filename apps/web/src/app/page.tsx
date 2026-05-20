@@ -23,7 +23,7 @@ import {
 
 // Quick actions — static navigation links (no backend dependency)
 const quickActions = [
-  { label: "New Crawl", icon: RefreshCcw, href: "/businesses", description: "Crawl a website" },
+  { label: "New Crawl", icon: RefreshCcw, href: "/websites", description: "Crawl a website" },
   { label: "Run SEO Audit", icon: Search, href: "/audits", description: "Technical analysis" },
   { label: "Run GEO Audit", icon: Activity, href: "/audits", description: "AI visibility check" },
   { label: "Generate Report", icon: FileText, href: "/reports", description: "Export findings" },
@@ -225,7 +225,7 @@ export default function DashboardPage() {
               <h2 className="text-base font-semibold text-white">Recent Crawls</h2>
               <p className="text-xs text-slate-500 mt-0.5">Latest website scans</p>
             </div>
-            <a href="/businesses" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
+            <a href="/audits" className="flex items-center gap-1 text-xs text-blue-400 hover:underline">
               View all <ArrowUpRight className="h-3 w-3" />
             </a>
           </div>
@@ -236,28 +236,27 @@ export default function DashboardPage() {
                   <th className="px-5 py-3 font-medium">Website</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                   <th className="px-5 py-3 font-medium">Pages</th>
-                  <th className="px-5 py-3 font-medium">Score</th>
                   <th className="px-5 py-3 font-medium">When</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {crawlLoading && (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
+                    <td colSpan={4} className="px-5 py-8 text-center text-slate-500 text-sm">
                       Loading crawls...
                     </td>
                   </tr>
                 )}
                 {crawlError && (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center">
+                    <td colSpan={4} className="px-5 py-8 text-center">
                       <span className="text-red-400 text-sm">Failed to load crawls</span>
                     </td>
                   </tr>
                 )}
                 {!crawlLoading && displayCrawls.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 text-sm">
+                    <td colSpan={4} className="px-5 py-8 text-center text-slate-500 text-sm">
                       No crawls yet. Run your first crawl from the Businesses page.
                     </td>
                   </tr>
@@ -274,9 +273,6 @@ export default function DashboardPage() {
                       />
                     </td>
                     <td className="px-5 py-3 text-slate-300">{crawl.pages}</td>
-                    <td className="px-5 py-3">
-                      <span className="text-slate-600">—</span>
-                    </td>
                     <td className="px-5 py-3 text-slate-500">{crawl.date}</td>
                   </tr>
                 ))}
