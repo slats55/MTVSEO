@@ -72,6 +72,9 @@ export default function CrawlDetailPage({
   const { id } = use(params);
   const { data: crawl, isLoading, isError } = useCrawl(id);
 
+  // Back link: if crawl.website_id is missing/null, fall back to /websites
+  const backHref = crawl?.website_id ? `/websites/${crawl.website_id}` : "/websites";
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6 max-w-4xl mx-auto">
@@ -122,11 +125,11 @@ export default function CrawlDetailPage({
       {/* Breadcrumb */}
       <div className="flex items-center gap-3">
         <Link
-          href="/websites"
+          href={backHref}
           className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Websites
+          {crawl.website_id ? "Back to website" : "Websites"}
         </Link>
         <ChevronRight className="h-4 w-4 text-slate-700" />
         <span className="text-sm text-slate-500">Crawl Detail</span>
@@ -248,11 +251,11 @@ export default function CrawlDetailPage({
       {/* Back link */}
       <div className="flex items-center">
         <Link
-          href={`/websites/${crawl.website_id}`}
+          href={backHref}
           className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to website
+          {crawl.website_id ? "Back to website" : "Back to Websites"}
         </Link>
       </div>
 
