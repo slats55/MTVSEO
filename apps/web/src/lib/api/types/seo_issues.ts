@@ -6,6 +6,7 @@ export interface SeoIssue {
   id: string;
   page_id: string | null;
   crawl_run_id: string;
+  website_id?: string | null; // derived: page.crawl_run.website_id
   issue_type: string;
   severity: IssueSeverity;
   title: string;
