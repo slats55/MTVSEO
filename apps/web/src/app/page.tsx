@@ -108,6 +108,34 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-slate-800 bg-slate-900 px-5 py-4">
+          <p className="text-xs text-slate-500">Businesses</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {bizLoading ? "—" : (businessData?.total ?? businessData?.items?.length ?? 0)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900 px-5 py-4">
+          <p className="text-xs text-slate-500">Websites</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {siteLoading ? "—" : (websiteData?.total ?? websiteData?.items?.length ?? 0)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900 px-5 py-4">
+          <p className="text-xs text-slate-500">Crawl Runs</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {crawlLoading ? "—" : (crawlData?.total ?? crawlData?.items?.length ?? 0)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900 px-5 py-4">
+          <p className="text-xs text-slate-500">SEO Issues</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {issueLoading ? "—" : (issueData?.total ?? issueData?.items?.length ?? 0)}
+          </p>
+        </div>
+      </div>
+
       {/* Business Projects Overview */}
       <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
