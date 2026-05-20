@@ -269,7 +269,7 @@ function AuditsContent() {
         {!isLoading && !isError && filtered.length > 0 && (
           <div className="divide-y divide-slate-800">
             {filtered.map((issue) => {
-              const hasWebsite = !!issue.website_id && issue.website_id !== "00000000-0000-0000-0000-000000000000";
+              const hasWebsite = !!issue.website_id;
               const hasCrawl = !!issue.crawl_run_id;
               const linkToWebsite = hasWebsite ? `/websites/${issue.website_id}` : null;
               const linkToCrawl = hasCrawl ? `/crawls/${issue.crawl_run_id}` : null;

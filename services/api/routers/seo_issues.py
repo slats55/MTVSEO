@@ -48,7 +48,7 @@ async def list_seo_issues(
 
     items = []
     for seo_issue in rows:
-        website_id = UUID("00000000-0000-0000-0000-000000000000")  # default; safest fallback
+        website_id: UUID | None = None
         try:
             if seo_issue.page and seo_issue.page.crawl_run and seo_issue.page.crawl_run.website:
                 website_id = seo_issue.page.crawl_run.website.id
@@ -97,7 +97,7 @@ async def get_seo_issue(
             detail=f"SeoIssue with id={seo_issue_id} not found",
         )
 
-    website_id = UUID("00000000-0000-0000-0000-000000000000")
+    website_id: UUID | None = None
     try:
         if seo_issue.page and seo_issue.page.crawl_run and seo_issue.page.crawl_run.website:
             website_id = seo_issue.page.crawl_run.website.id

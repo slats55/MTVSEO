@@ -12,7 +12,7 @@ class SeoIssueRead(BaseModel):
     id: UUID
     page_id: UUID | None
     crawl_run_id: UUID
-    website_id: UUID  # derived: page.crawl_run.website_id
+    website_id: UUID | None = None  # derived: page.crawl_run.website_id
     issue_type: str
     severity: str
     title: str
