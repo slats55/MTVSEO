@@ -7,7 +7,7 @@ import { useSeoIssues } from "@/lib/queries/useSeoIssues";
 import { useWebsites } from "@/lib/queries/useWebsites";
 import { useCreateCrawl } from "@/lib/queries/useCrawls";
 import { SEVERITY_LABELS, SEVERITY_VARIANTS } from "@/lib/api/types/seo_issues";
-import { AlertTriangle, CheckCircle2, FileSearch, Filter, TrendingDown, PlayCircle, ExternalLink } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Filter, TrendingDown, PlayCircle, ExternalLink } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { Loader2 as Spinner } from "lucide-react";
 
